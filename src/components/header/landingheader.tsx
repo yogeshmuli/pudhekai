@@ -10,7 +10,7 @@ export default function LandingHeader() {
             <div className="flex items-center gap-4">
 
                 <TextButton href="/login">Login</TextButton>
-                <SolidButton href="/signup">Sign Up</SolidButton>
+                <SolidButton href="/register">Sign Up</SolidButton>
             </div>
         </header>
     );
