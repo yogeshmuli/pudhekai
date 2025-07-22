@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Protected routes logic
-  const protectedRoutes = ["/dashboard", "/profile", "/homepage"];
+  const protectedRoutes = ["/dashboard", "/profile", "/home"];
   if (
     protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
   ) {

@@ -28,3 +28,14 @@ export async function POST(request: Request) {
     { status: 401 }
   );
 }
+
+// create get call
+export async function GET() {
+  const token = (await cookies()).get("auth_token")?.value;
+
+  if (token) {
+    return NextResponse.json({ authenticated: true });
+  }
+
+  return NextResponse.json({ authenticated: false });
+}

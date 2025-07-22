@@ -16,7 +16,7 @@ export default function Login() {
         e.preventDefault();
         const resultAction = await dispatch(login({ username, password }));
         if (login.fulfilled.match(resultAction)) {
-            router.push("/homepage");
+            router.push("/home");
         }
     };
 
