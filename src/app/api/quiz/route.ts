@@ -1,9 +1,32 @@
+/**
+ * @openapi
+ * /api/quiz:
+ *   get:
+ *     summary: Generate a randomized quiz for a given test and assessment type
+ *     parameters:
+ *       - in: query
+ *         name: test
+ *         schema:
+ *           type: string
+ *           enum: [hexaco, riasec, mi, nih, learningstyle, reasoning, family]
+ *         required: true
+ *         description: The quiz/test type
+ *       - in: query
+ *         name: assessmentType
+ *         schema:
+ *           type: string
+ *           enum: [free, paid]
+ *         required: false
+ *         description: Assessment tier (ignored for family quiz)
+ *     responses:
+ *       200:
+ *         description: Randomized quiz questions
+ */
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
 function shuffle<T>(array: T[]): T[] {
-  // Fisher-Yates shuffle
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
@@ -11,15 +34,15 @@ function shuffle<T>(array: T[]): T[] {
   return array;
 }
 
-function loadJson(filename: string) {
+function loadJson(filename: string): any[] {
   const jsonPath = path.join(process.cwd(), "src/services/" + filename);
   return JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 }
 
-function selectPerGroup<T>(items: T[], groupKey: string, nPerGroup: number): T[] {
+function selectPerGroup<T extends Record<string, any>>(items: T[], groupKey: string, nPerGroup: number): T[] {
   const grouped: { [key: string]: T[] } = {};
-  items.forEach(q => {
-    const key = (q as any)[groupKey];
+  items.forEach((q: T) => {
+    const key = q[groupKey];
     if (!key) return;
     grouped[key] = grouped[key] || [];
     grouped[key].push(q);
@@ -31,33 +54,13 @@ function selectPerGroup<T>(items: T[], groupKey: string, nPerGroup: number): T[]
   return selected;
 }
 
-/**
- * @openapi
- * /api/quiz:
- *   post:
- *     summary: Generate a randomized quiz for a given test and assessment type
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               test:
- *                 type: string
- *                 enum: [hexaco, riasec, mi, nih, learningstyle, reasoning, family]
- *               assessmentType:
- *                 type: string
- *                 enum: [free, paid]
- *     responses:
- *       200:
- *         description: Randomized quiz questions
- */
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
-    const { test, assessmentType } = await request.json();
+    const { searchParams } = new URL(request.url);
+    const test = searchParams.get('test');
+    const assessmentType = searchParams.get('assessmentType');
     const type = (assessmentType === "paid") ? "paid" : "free";
-    let questions: any[] = [];
+    let questions = [];
 
     switch (test) {
       case "hexaco": {
@@ -74,7 +77,6 @@ export async function POST(request: Request) {
       }
       case "mi": {
         const all = loadJson("mi_questions.json");
-        // Always 5 per intelligence, both free and paid
         questions = selectPerGroup(all, "intelligence", 5);
         break;
       }
@@ -105,7 +107,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Invalid test type" }, { status: 400 });
     }
 
-    // Shuffle the final question order
     questions = shuffle(questions);
     return NextResponse.json({ questions });
   } catch (error) {
