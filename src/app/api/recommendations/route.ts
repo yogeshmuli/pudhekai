@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCareerRecommendations, CareerAssessmentInput } from '../../../services/careerRecommendations';
-import { getCareerRecommendationsGeminiApiKey, parseGeminiRecommendations } from '../../../services/recommendationsGemini';
+import { getCareerRecommendations, CareerAssessmentInput } from '../../../services/recommendationsOpenAI';
+import { getCareerRecommendationsGemini, parseGeminiRecommendations } from '../../../services/recommendationsGemini';
 /**
  * @openapi
  * /api/recommendations:
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     let recommendations;
     if (input.provider === 'gemini') {
-      const raw = await getCareerRecommendationsGeminiApiKey(input);
+      const raw = await getCareerRecommendationsGemini(input);
       recommendations = parseGeminiRecommendations(raw);
     } else {
       recommendations = await getCareerRecommendations(input);

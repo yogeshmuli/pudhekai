@@ -3,9 +3,11 @@ import fetch from 'node-fetch';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
 
-export async function getCareerRecommendationsGeminiApiKey(input: any): Promise<string> {
+export async function getCareerRecommendationsGemini(input: any): Promise<string> {
   const prompt = `
-You are a career counselor for Indian students. Suggest 3 personalized career options with all details, based on these assessments:
+You are a career counselor for Indian students. Suggest exactly 3 personalized career options with all details, based on these assessments.
+
+Respond with exactly 3 options, each clearly labeled as **Option 1:**, **Option 2:**, and **Option 3:**.
 
 Personality (HEXACO): 
 ${Object.entries(input.hexaco).map(([trait, val]) => `${trait}: ${val}`).join(", ")}
@@ -38,7 +40,10 @@ For each career, provide in markdown:
             { text: prompt }
           ]
         }
-      ]
+      ],
+      generationConfig: {
+        maxOutputTokens: 2048
+      }
     }),
   });
 
