@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCareerRecommendations, CareerAssessmentInput } from '../../../services/careerRecommendations';
-import { getCareerRecommendationsGeminiApiKey } from '../../../services/recommendationsGemini';
-
+import { getCareerRecommendationsGeminiApiKey, parseGeminiRecommendations } from '../../../services/recommendationsGemini';
 /**
  * @openapi
  * /api/recommendations:
@@ -14,15 +13,28 @@ import { getCareerRecommendationsGeminiApiKey } from '../../../services/recommen
  *           schema:
  *             type: object
  *             properties:
- *               hexaco: { type: object }
- *               riasec: { type: object }
- *               mi: { type: object }
- *               familyContext: { type: string }
- *               provider: { type: string, enum: [openai, gemini] }
+ *               hexaco:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: number
+ *               riasec:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: number
+ *               mi:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: number
+ *               familyContext:
+ *                 type: string
+ *               provider:
+ *                 type: string
+ *                 enum: [openai, gemini]
  *     responses:
  *       200:
  *         description: Career recommendations
  */
+// POST /api/recommendations
 export async function POST(req: NextRequest) {
   try {
     const input = await req.json();
@@ -34,7 +46,8 @@ export async function POST(req: NextRequest) {
 
     let recommendations;
     if (input.provider === 'gemini') {
-      recommendations = await getCareerRecommendationsGeminiApiKey(input);
+      const raw = await getCareerRecommendationsGeminiApiKey(input);
+      recommendations = parseGeminiRecommendations(raw);
     } else {
       recommendations = await getCareerRecommendations(input);
     }

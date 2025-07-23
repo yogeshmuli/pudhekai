@@ -1,8 +1,6 @@
 import fetch from 'node-fetch';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-//const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro:generateContent';
-//const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent';
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
 
 export async function getCareerRecommendationsGeminiApiKey(input: any): Promise<string> {
@@ -54,4 +52,27 @@ For each career, provide in markdown:
     result?.candidates?.[0]?.content?.parts?.[0]?.text ||
     ""
   );
+}
+
+export function parseGeminiRecommendations(text: string) {
+  // Split by "**Option" or "** Option" (handles both)
+  const options = text.split(/\*\*Option\s*\d+:?/i).filter(Boolean);
+
+  return options.map(optionText => {
+    const jobTitle = optionText.match(/\*\*Job Title:\*\*\s*(.+)/)?.[1]?.trim();
+    const jobDuties = optionText.match(/\*\*Job Duties:\*\*([\s\S]*?)\n\n3\./)?.[1]?.trim();
+    const keySkills = optionText.match(/\*\*Key Skills Required:\*\*([\s\S]*?)\n\n4\./)?.[1]?.trim();
+    const salary = optionText.match(/\*\*Average Salary in INR \(India, 2024\):\*\*\s*(.+)/)?.[1]?.trim();
+    const careerPath = optionText.match(/\*\*Typical Career Path:\*\*([\s\S]*?)\n\n6\./)?.[1]?.trim();
+    const whyFit = optionText.match(/\*\*Why this career fits the student’s profile:\*\*\s*(.+)/)?.[1]?.trim();
+
+    return {
+      jobTitle,
+      jobDuties,
+      keySkills,
+      salary,
+      careerPath,
+      whyFit
+    };
+  });
 }
