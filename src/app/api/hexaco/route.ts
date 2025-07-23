@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server";
 import { getHexacoResult, UserResponses, AssessmentType } from "../../../services/hexacoScoring";
 
+/**
+ * @openapi
+ * /api/hexaco:
+ *   post:
+ *     summary: Calculate HEXACO trait scores
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               responses:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: integer
+ *               assessmentType:
+ *                 type: string
+ *                 enum: [free, paid]
+ *     responses:
+ *       200:
+ *         description: Trait scores and questions used
+ */
 export async function POST(request: Request) {
   try {
     const { responses, assessmentType } = await request.json();

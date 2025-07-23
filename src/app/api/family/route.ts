@@ -1,6 +1,26 @@
 import { NextResponse } from "next/server";
 import { summarizeFamilyProfile, FamilyContextResponse } from "../../../services/familyScoring";
 
+/**
+ * @openapi
+ * /api/family:
+ *   post:
+ *     summary: Summarize family context quiz responses
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               responses:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Human-readable family context summary
+ */
 export async function POST(request: Request) {
   try {
     const { responses } = await request.json();

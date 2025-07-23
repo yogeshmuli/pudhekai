@@ -31,6 +31,28 @@ function selectPerGroup<T>(items: T[], groupKey: string, nPerGroup: number): T[]
   return selected;
 }
 
+/**
+ * @openapi
+ * /api/quiz:
+ *   post:
+ *     summary: Generate a randomized quiz for a given test and assessment type
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               test:
+ *                 type: string
+ *                 enum: [hexaco, riasec, mi, nih, learningstyle, reasoning, family]
+ *               assessmentType:
+ *                 type: string
+ *                 enum: [free, paid]
+ *     responses:
+ *       200:
+ *         description: Randomized quiz questions
+ */
 export async function POST(request: Request) {
   try {
     const { test, assessmentType } = await request.json();
