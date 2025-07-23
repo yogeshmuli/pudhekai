@@ -1,6 +1,26 @@
 import { NextResponse } from "next/server";
 import { getMIResult, UserResponses } from "../../../services/miScoring";
 
+/**
+ * @openapi
+ * /api/mi:
+ *   post:
+ *     summary: Calculate Multiple Intelligences (MI) scores
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               responses:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: MI scores by intelligence type
+ */
 export async function POST(request: Request) {
   try {
     const { responses } = await request.json();
