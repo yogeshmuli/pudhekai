@@ -1,0 +1,37 @@
+[
+    {"id": "r1", "category": "Realistic", "text": "I like to work on cars."},
+    {"id": "r2", "category": "Realistic", "text": "I enjoy building things with my hands."},
+    {"id": "r3", "category": "Realistic", "text": "I prefer working outdoors."},
+    {"id": "r4", "category": "Realistic", "text": "I like operating machines or tools."},
+    {"id": "r5", "category": "Realistic", "text": "I enjoy repairing things."},
+  
+    {"id": "i1", "category": "Investigative", "text": "I like to solve math problems."},
+    {"id": "i2", "category": "Investigative", "text": "I enjoy science experiments."},
+    {"id": "i3", "category": "Investigative", "text": "I am curious about how things work."},
+    {"id": "i4", "category": "Investigative", "text": "I like working with abstract ideas."},
+    {"id": "i5", "category": "Investigative", "text": "I enjoy analyzing data."},
+  
+    {"id": "a1", "category": "Artistic", "text": "I enjoy creative writing."},
+    {"id": "a2", "category": "Artistic", "text": "I like to draw, paint, or do other art."},
+    {"id": "a3", "category": "Artistic", "text": "I enjoy playing musical instruments."},
+    {"id": "a4", "category": "Artistic", "text": "I like acting or performing."},
+    {"id": "a5", "category": "Artistic", "text": "I enjoy expressing myself creatively."},
+  
+    {"id": "s1", "category": "Social", "text": "I like helping people with their problems."},
+    {"id": "s2", "category": "Social", "text": "I enjoy teaching or training others."},
+    {"id": "s3", "category": "Social", "text": "I prefer working in teams."},
+    {"id": "s4", "category": "Social", "text": "I am good at making people feel comfortable."},
+    {"id": "s5", "category": "Social", "text": "I like volunteering for community service."},
+  
+    {"id": "e1", "category": "Enterprising", "text": "I like to lead and persuade people."},
+    {"id": "e2", "category": "Enterprising", "text": "I enjoy selling things or ideas."},
+    {"id": "e3", "category": "Enterprising", "text": "I like starting new projects."},
+    {"id": "e4", "category": "Enterprising", "text": "I am comfortable making decisions."},
+    {"id": "e5", "category": "Enterprising", "text": "I enjoy taking risks in business."},
+  
+    {"id": "c1", "category": "Conventional", "text": "I like organizing information or files."},
+    {"id": "c2", "category": "Conventional", "text": "I enjoy working with numbers or data."},
+    {"id": "c3", "category": "Conventional", "text": "I prefer tasks with clear instructions."},
+    {"id": "c4", "category": "Conventional", "text": "I like working in structured environments."},
+    {"id": "c5", "category": "Conventional", "text": "I pay attention to details in my work."}
+  ]

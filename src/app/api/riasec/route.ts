@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getHexacoResult, UserResponses, AssessmentType } from "../../../services/hexacoScoring";
+import { getRiasecResult, UserResponses } from "../../../services/riasecScoring";
 
 export async function POST(request: Request) {
   try {
@@ -8,12 +8,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid or missing responses" }, { status: 400 });
     }
 
-    const { traitScores, questionsUsed } = getHexacoResult(
+    const { categoryScores, questionsUsed } = getRiasecResult(
       responses as UserResponses,
-      assessmentType as AssessmentType || "free"
+      assessmentType || "free"
     );
 
-    return NextResponse.json({ traitScores, questionsUsed });
+    return NextResponse.json({ categoryScores, questionsUsed });
   } catch (error) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

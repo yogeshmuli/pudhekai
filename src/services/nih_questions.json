@@ -1,0 +1,8 @@
+[
+    {"id": "nih1", "domain": "Working Memory", "text": "I can remember and follow complex instructions with several steps."},
+    {"id": "nih2", "domain": "Processing Speed", "text": "I can quickly solve problems or make decisions."},
+    {"id": "nih3", "domain": "Executive Function", "text": "I can easily switch tasks and adapt to changes."},
+    {"id": "nih4", "domain": "Episodic Memory", "text": "I remember events and experiences from the past in detail."},
+    {"id": "nih5", "domain": "Attention", "text": "I am able to focus on one task for a long time without getting distracted."},
+    {"id": "nih6", "domain": "Vocabulary", "text": "I know the meanings of many words and can use them correctly."}
+  ]

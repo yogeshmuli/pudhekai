@@ -1,0 +1,5 @@
+[
+    {"id": "rq1", "domain": "Pattern Recognition", "text": "I am good at spotting patterns or trends in information."},
+    {"id": "rq2", "domain": "Deductive Reasoning", "text": "I can draw logical conclusions from given facts or rules."},
+    {"id": "rq3", "domain": "Problem Solving", "text": "I enjoy finding solutions to difficult problems."}
+  ]
