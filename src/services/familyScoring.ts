@@ -63,7 +63,8 @@ export type FamilyContextResponse = {
     // Build a readable summary
     let summaryParts: string[] = [];
     for (const key in responses) {
-      const label = profileLabels[key]?.[responses[key]];
+      const questionLabels = profileLabels[key as keyof typeof profileLabels];
+      const label = questionLabels?.[responses[key] as keyof typeof questionLabels];
       if (label) summaryParts.push(label);
     }
     // Compose one or more summary sentences (customize as needed)
