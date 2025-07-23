@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCareerRecommendations, CareerAssessmentInput } from '../../../services/careerRecommendations';
+import { getCareerRecommendationsGeminiApiKey } from '../../../services/recommendationsGemini';
+
 /**
  * @openapi
  * /api/recommendations:
@@ -12,35 +14,30 @@ import { getCareerRecommendations, CareerAssessmentInput } from '../../../servic
  *           schema:
  *             type: object
  *             properties:
- *               hexaco:
- *                 type: object
- *                 additionalProperties:
- *                   type: number
- *               riasec:
- *                 type: object
- *                 additionalProperties:
- *                   type: number
- *               mi:
- *                 type: object
- *                 additionalProperties:
- *                   type: number
- *               familyContext:
- *                 type: string
+ *               hexaco: { type: object }
+ *               riasec: { type: object }
+ *               mi: { type: object }
+ *               familyContext: { type: string }
+ *               provider: { type: string, enum: [openai, gemini] }
  *     responses:
  *       200:
  *         description: Career recommendations
  */
-// POST /api/career-recommendation
 export async function POST(req: NextRequest) {
   try {
-    const input = (await req.json()) as CareerAssessmentInput;
+    const input = await req.json();
 
     // Validate input
     if (!input.hexaco || !input.riasec || !input.mi || !input.familyContext) {
       return NextResponse.json({ error: 'Incomplete assessment data.' }, { status: 400 });
     }
 
-    const recommendations = await getCareerRecommendations(input);
+    let recommendations;
+    if (input.provider === 'gemini') {
+      recommendations = await getCareerRecommendationsGeminiApiKey(input);
+    } else {
+      recommendations = await getCareerRecommendations(input);
+    }
 
     return NextResponse.json({ recommendations });
   } catch (error: any) {
