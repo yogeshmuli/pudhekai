@@ -74,6 +74,11 @@ export async function POST(request: Request) {
         questions = selectPerGroup(all, "domain", n);
         break;
       }
+      case "family": {
+        const all = loadJson("familiy_questions.json");
+        questions = shuffle(all);
+        break;
+      }
       default:
         return NextResponse.json({ error: "Invalid test type" }, { status: 400 });
     }

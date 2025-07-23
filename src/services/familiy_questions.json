@@ -1,0 +1,94 @@
+[
+    {
+      "id": "fc1",
+      "domain": "IncomeGroup",
+      "text": "Which of these best describes your family’s financial background?",
+      "options": [
+        "Very Low Income",
+        "Low Income",
+        "Middle Income",
+        "Upper Middle Income",
+        "Wealthy"
+      ]
+    },
+    {
+      "id": "fc2",
+      "domain": "RuralUrban",
+      "text": "Where did you spend most of your childhood?",
+      "options": [
+        "Rural area / Village",
+        "Small Town",
+        "City / Urban area",
+        "Metro city"
+      ]
+    },
+    {
+      "id": "fc3",
+      "domain": "ParentEducation",
+      "text": "What is the highest level of education attained by either of your parents?",
+      "options": [
+        "No formal schooling",
+        "Up to 10th grade (SSC/Matric)",
+        "12th grade (HSC/PUC)",
+        "Undergraduate degree / Diploma",
+        "Postgraduate or higher"
+      ]
+    },
+    {
+      "id": "fc4",
+      "domain": "FamilyOccupation",
+      "text": "Which best describes your family’s main earning activity?",
+      "options": [
+        "Farming/Agriculture",
+        "Own Business/Entrepreneurship",
+        "Salaried Job",
+        "Daily Wage/Labor",
+        "Other"
+      ]
+    },
+    {
+      "id": "fc5",
+      "domain": "FamilySupport",
+      "text": "How supportive is your family towards you pursuing higher studies or professional courses?",
+      "options": [
+        "Not supportive at all",
+        "Somewhat supportive, but with reservations",
+        "Supportive within family circumstances",
+        "Very supportive and encouraging"
+      ]
+    },
+    {
+      "id": "fc6",
+      "domain": "RoleModels",
+      "text": "Did you have access to professionals in your family or close social circle while growing up?",
+      "options": [
+        "No, very limited or none",
+        "Some, but not in my immediate family",
+        "Yes, in my extended family/social circle",
+        "Yes, in my immediate family"
+      ]
+    },
+    {
+      "id": "fc7",
+      "domain": "HomeLanguage",
+      "text": "What language do you primarily speak at home?",
+      "options": [
+        "Regional language only",
+        "Regional + Hindi/English",
+        "Hindi only",
+        "Hindi + English",
+        "English only"
+      ]
+    },
+    {
+      "id": "fc8",
+      "domain": "Migration",
+      "text": "Has your family relocated to another town/city for work or education?",
+      "options": [
+        "No, always lived in the same place",
+        "Yes, within the district/state",
+        "Yes, to another state/region",
+        "Yes, from rural to urban/metro"
+      ]
+    }
+  ]
