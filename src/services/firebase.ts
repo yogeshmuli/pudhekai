@@ -1,6 +1,8 @@
 // Firebase utility for server/client usage
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCf1KKEXvMsmZB_Wyn-HBKBL1pK3hrEqkA",
@@ -15,3 +17,5 @@ const firebaseConfig = {
 // Prevent re-initialization in hot-reload/dev
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const db = getFirestore(app); 
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
