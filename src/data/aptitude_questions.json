@@ -1,0 +1,324 @@
+[
+  {
+    "id": "pr1",
+    "type": "pattern_recognition",
+    "question": "Which number comes next in the series? 2, 4, 8, 16, ___",
+    "options": ["18", "24", "32", "20"],
+    "answerIndex": 2
+  },
+  {
+    "id": "pr2",
+    "type": "pattern_recognition",
+    "question": "Which figure completes the pattern? [Triangle, Square, Triangle, Square, ?]",
+    "options": ["Circle", "Triangle", "Rectangle", "Square"],
+    "answerIndex": 1
+  },
+  {
+    "id": "pr3",
+    "type": "pattern_recognition",
+    "question": "Fill in the blank: 5, 9, 17, 33, ___",
+    "options": ["50", "57", "65", "41"],
+    "answerIndex": 1
+  },
+  {
+    "id": "pr4",
+    "type": "pattern_recognition",
+    "question": "Which letter comes next? A, D, G, J, ___",
+    "options": ["M", "L", "O", "K"],
+    "answerIndex": 0
+  },
+  {
+    "id": "pr5",
+    "type": "pattern_recognition",
+    "question": "Which shape is next? [Black Circle, White Circle, Black Circle, White Circle, ?]",
+    "options": ["White Circle", "Black Circle", "Black Square", "White Square"],
+    "answerIndex": 1
+  },
+  {
+    "id": "pr6",
+    "type": "pattern_recognition",
+    "question": "Find the missing number: 1, 3, 6, 10, 15, ___",
+    "options": ["21", "20", "17", "22"],
+    "answerIndex": 0
+  },
+  {
+    "id": "pr7",
+    "type": "pattern_recognition",
+    "question": "Which pair comes next? (1,2), (3,4), (5,6), ___",
+    "options": ["(7,8)", "(6,7)", "(8,9)", "(9,10)"],
+    "answerIndex": 0
+  },
+  {
+    "id": "pr8",
+    "type": "pattern_recognition",
+    "question": "Complete the pattern: 100, 90, 81, 73, ___",
+    "options": ["65", "66", "70", "72"],
+    "answerIndex": 1
+  },
+  {
+    "id": "pr9",
+    "type": "pattern_recognition",
+    "question": "Which letter replaces the question mark? B, D, G, K, P, ___",
+    "options": ["V", "U", "T", "S"],
+    "answerIndex": 0
+  },
+  {
+    "id": "pr10",
+    "type": "pattern_recognition",
+    "question": "Which is the odd one out? [Square, Triangle, Cube, Rectangle]",
+    "options": ["Square", "Triangle", "Cube", "Rectangle"],
+    "answerIndex": 2
+  },
+  {
+    "id": "lr1",
+    "type": "logical_reasoning",
+    "question": "All roses are flowers. Some flowers fade quickly. Therefore, some roses fade quickly. Is the conclusion correct?",
+    "options": ["Yes", "No", "Cannot be determined"],
+    "answerIndex": 2
+  },
+  {
+    "id": "lr2",
+    "type": "logical_reasoning",
+    "question": "Which is the next term? Z, X, V, T, ___",
+    "options": ["R", "S", "Q", "P"],
+    "answerIndex": 0
+  },
+  {
+    "id": "lr3",
+    "type": "logical_reasoning",
+    "question": "If all engineers are smart, and Raj is an engineer, what can you conclude?",
+    "options": ["Raj is smart", "Raj is not smart", "Cannot be determined"],
+    "answerIndex": 0
+  },
+  {
+    "id": "lr4",
+    "type": "logical_reasoning",
+    "question": "Arrange in order: Elephant, Mouse, Cat, Dog (in increasing size).",
+    "options": [
+      "Mouse, Cat, Dog, Elephant",
+      "Cat, Mouse, Dog, Elephant",
+      "Mouse, Dog, Cat, Elephant",
+      "Mouse, Cat, Elephant, Dog"
+    ],
+    "answerIndex": 0
+  },
+  {
+    "id": "lr5",
+    "type": "logical_reasoning",
+    "question": "If every apple is a fruit and some fruits are sour, can you say all apples are sour?",
+    "options": ["Yes", "No", "Cannot be determined"],
+    "answerIndex": 2
+  },
+  {
+    "id": "lr6",
+    "type": "logical_reasoning",
+    "question": "Which is the odd one out? Book, Pen, Pencil, Apple",
+    "options": ["Book", "Pen", "Pencil", "Apple"],
+    "answerIndex": 3
+  },
+  {
+    "id": "lr7",
+    "type": "logical_reasoning",
+    "question": "If today is Monday, what day will it be 10 days from now?",
+    "options": ["Thursday", "Friday", "Wednesday", "Saturday"],
+    "answerIndex": 1
+  },
+  {
+    "id": "lr8",
+    "type": "logical_reasoning",
+    "question": "Which number is missing? 1, 4, 9, 16, ___, 36",
+    "options": ["20", "25", "24", "30"],
+    "answerIndex": 1
+  },
+  {
+    "id": "lr9",
+    "type": "logical_reasoning",
+    "question": "Complete the analogy: Hand is to Glove as Foot is to ___",
+    "options": ["Sock", "Shoe", "Boot", "Slipper"],
+    "answerIndex": 0
+  },
+  {
+    "id": "lr10",
+    "type": "logical_reasoning",
+    "question": "If two pencils cost ₹8, how many pencils can you buy for ₹32?",
+    "options": ["6", "8", "10", "16"],
+    "answerIndex": 3
+  },{
+    "id": "nr1",
+    "type": "numerical_reasoning",
+    "question": "What is 15% of 200?",
+    "options": ["15", "20", "25", "30"],
+    "answerIndex": 3
+  },
+  {
+    "id": "nr2",
+    "type": "numerical_reasoning",
+    "question": "If 4 pens cost ₹48, how much do 7 pens cost?",
+    "options": ["₹70", "₹84", "₹96", "₹56"],
+    "answerIndex": 1
+  },
+  {
+    "id": "nr3",
+    "type": "numerical_reasoning",
+    "question": "What is the next number in the sequence: 2, 5, 10, 17, ___",
+    "options": ["26", "24", "20", "18"],
+    "answerIndex": 0
+  },
+  {
+    "id": "nr4",
+    "type": "numerical_reasoning",
+    "question": "If a train travels 60 km in 1.5 hours, what is its speed?",
+    "options": ["30 km/h", "40 km/h", "50 km/h", "60 km/h"],
+    "answerIndex": 0
+  },
+  {
+    "id": "nr5",
+    "type": "numerical_reasoning",
+    "question": "Which fraction is the largest: 1/2, 2/3, 3/5, 5/8?",
+    "options": ["1/2", "2/3", "3/5", "5/8"],
+    "answerIndex": 1
+  },
+  {
+    "id": "nr6",
+    "type": "numerical_reasoning",
+    "question": "What is 12 squared?",
+    "options": ["124", "142", "144", "154"],
+    "answerIndex": 2
+  },
+  {
+    "id": "nr7",
+    "type": "numerical_reasoning",
+    "question": "If a box contains 36 apples, and 9 are rotten, what percentage are rotten?",
+    "options": ["10%", "20%", "25%", "30%"],
+    "answerIndex": 3
+  },
+  {
+    "id": "nr8",
+    "type": "numerical_reasoning",
+    "question": "Divide 100 by 4, then add 7.",
+    "options": ["25", "27", "32", "35"],
+    "answerIndex": 1
+  },
+  {
+    "id": "nr9",
+    "type": "numerical_reasoning",
+    "question": "What is the value of x if x/2 = 11?",
+    "options": ["11", "20", "22", "44"],
+    "answerIndex": 2
+  },
+  {
+    "id": "nr10",
+    "type": "numerical_reasoning",
+    "question": "How many sides does a decagon have?",
+    "options": ["8", "10", "12", "9"],
+    "answerIndex": 1
+  },{
+    "id": "cr1",
+    "type": "critical_reasoning",
+    "question": "Statement: All healthy people exercise. Sita does not exercise. What can you conclude?",
+    "options": [
+      "Sita is healthy",
+      "Sita is not healthy",
+      "Cannot be determined",
+      "Sita exercises sometimes"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "cr2",
+    "type": "critical_reasoning",
+    "question": "Which of the following weakens the argument: 'Drinking tea improves focus'? ",
+    "options": [
+      "Many people who do not drink tea also have good focus.",
+      "Tea is enjoyed by millions.",
+      "Tea contains caffeine.",
+      "Some teas are herbal."
+    ],
+    "answerIndex": 0
+  },
+  {
+    "id": "cr3",
+    "type": "critical_reasoning",
+    "question": "If A is taller than B and B is taller than C, who is the shortest?",
+    "options": ["A", "B", "C", "Cannot be determined"],
+    "answerIndex": 2
+  },
+  {
+    "id": "cr4",
+    "type": "critical_reasoning",
+    "question": "Passage: All students must pass math to graduate. Priya did not pass math. What can you say?",
+    "options": [
+      "Priya will graduate",
+      "Priya will not graduate",
+      "Priya may graduate",
+      "Cannot be determined"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "cr5",
+    "type": "critical_reasoning",
+    "question": "What assumption is being made? 'Most birds can fly. Penguins are birds, so penguins can fly.'",
+    "options": [
+      "All birds can fly",
+      "Some birds can fly",
+      "Penguins can fly",
+      "No birds can fly"
+    ],
+    "answerIndex": 0
+  },
+  {
+    "id": "cr6",
+    "type": "critical_reasoning",
+    "question": "Which one is an inference? 'Where there is smoke, there is fire.'",
+    "options": [
+      "Fire always causes smoke",
+      "Smoke always causes fire",
+      "If smoke is seen, fire may be present",
+      "No smoke means no fire"
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "cr7",
+    "type": "critical_reasoning",
+    "question": "Statement: All engineers are good at math. Ravi is good at math. Is Ravi necessarily an engineer?",
+    "options": ["Yes", "No", "Cannot be determined"],
+    "answerIndex": 1
+  },
+  {
+    "id": "cr8",
+    "type": "critical_reasoning",
+    "question": "Passage: Some students who study regularly get good marks. Ravi studies regularly. Can we say Ravi gets good marks?",
+    "options": [
+      "Yes",
+      "No",
+      "Cannot be determined"
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "cr9",
+    "type": "critical_reasoning",
+    "question": "Which strengthens the argument: 'Exercise leads to better health'?",
+    "options": [
+      "People who exercise regularly tend to have fewer health problems.",
+      "Some people dislike exercise.",
+      "Exercise can be done indoors.",
+      "Many people are healthy without exercising."
+    ],
+    "answerIndex": 0
+  },
+  {
+    "id": "cr10",
+    "type": "critical_reasoning",
+    "question": "Which is an example of a cause-effect relationship?",
+    "options": [
+      "Sun rises and the rooster crows",
+      "Eat too much sugar and get tooth decay",
+      "Ice cream sales increase in summer",
+      "Read a book and take a test"
+    ],
+    "answerIndex": 1
+  }
+]

@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getCareerRecommendations, CareerAssessmentInput } from '../../../services/careerRecommendations';
+import { NextRequest, NextResponse } from "next/server";
+import {
+  getCareerRecommendations,
+  CareerAssessmentInput,
+} from "../../../services/careerRecommendations";
 /**
  * @openapi
  * /api/recommendations:
@@ -37,16 +40,19 @@ export async function POST(req: NextRequest) {
 
     // Validate input
     if (!input.hexaco || !input.riasec || !input.mi || !input.familyContext) {
-      return NextResponse.json({ error: 'Incomplete assessment data.' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Incomplete assessment data." },
+        { status: 400 }
+      );
     }
 
     const recommendations = await getCareerRecommendations(input);
 
     return NextResponse.json({ recommendations });
   } catch (error: any) {
-    console.error('Career Recommendation Error:', error);
+    console.error("Career Recommendation Error:", error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to get career recommendations' },
+      { error: error?.message || "Failed to get career recommendations" },
       { status: 500 }
     );
   }

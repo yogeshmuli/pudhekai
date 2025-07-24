@@ -1,0 +1,6 @@
+[
+    {"id": "ls1", "style": "Visual", "text": "I understand information better when I see diagrams or charts."},
+    {"id": "ls2", "style": "Auditory", "text": "I learn best when I hear information explained."},
+    {"id": "ls3", "style": "Reading/Writing", "text": "I prefer to learn by reading text or writing notes."},
+    {"id": "ls4", "style": "Kinesthetic", "text": "I learn best by doing, practicing, or moving."}
+  ]

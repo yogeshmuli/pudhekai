@@ -4,7 +4,13 @@ import path from "path";
 // Question Type
 export type RiasecQuestion = {
   id: string;
-  category: "Realistic" | "Investigative" | "Artistic" | "Social" | "Enterprising" | "Conventional";
+  category:
+    | "Realistic"
+    | "Investigative"
+    | "Artistic"
+    | "Social"
+    | "Enterprising"
+    | "Conventional";
   text: string;
 };
 
@@ -14,7 +20,7 @@ export type UserResponses = { [id: string]: number };
 // Load Questions from JSON
 function loadQuestions(): RiasecQuestion[] {
   try {
-    const jsonPath = path.join(process.cwd(), "src/services/riasec_questions.json");
+    const jsonPath = path.join(process.cwd(), "src/data/riasec_questions.json");
     console.log("Loading RIASEC questions from:", jsonPath);
     const data = fs.readFileSync(jsonPath, "utf8");
     return JSON.parse(data) as RiasecQuestion[];
@@ -32,7 +38,7 @@ function selectQuestions(
   const nPerCategory = assessmentType === "free" ? 2 : 5;
   const grouped: { [category: string]: RiasecQuestion[] } = {};
 
-  allQuestions.forEach(q => {
+  allQuestions.forEach((q) => {
     grouped[q.category] = grouped[q.category] || [];
     grouped[q.category].push(q);
   });
@@ -73,5 +79,5 @@ export function getRiasecResult(
   const allQuestions = loadQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const categoryScores = scoreRiasec(selectedQuestions, userResponses);
-  return { categoryScores, questionsUsed: selectedQuestions.map(q => q.id) };
+  return { categoryScores, questionsUsed: selectedQuestions.map((q) => q.id) };
 }
