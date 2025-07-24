@@ -15,13 +15,36 @@ export interface CareerAssessmentInput {
   riasec: { [type: string]: number };
   mi: { [domain: string]: number };
   familyContext: string;
+  aptitude?: {
+    categories: { [type: string]: { correct: number; total: number; percent: number; label: string } };
+    totalScore: number;
+    totalQuestions: number;
+    totalPercent: number;
+    summary: string;
+  };
+  isPaidTier?: boolean;
 }
 
 export async function getCareerRecommendations(
   input: CareerAssessmentInput
 ): Promise<string> {
+  let aptitudeSection = '';
+  
+  // Include aptitude data only for paid tier users
+  if (input.isPaidTier && input.aptitude) {
+    aptitudeSection = `
+Aptitude Test Results (Paid Tier Assessment):
+${Object.entries(input.aptitude.categories)
+  .map(([type, data]) => `${type.replace(/_/g, ' ')}: ${data.correct}/${data.total} (${data.percent}% - ${data.label})`)
+  .join(", ")}
+
+Overall Aptitude Score: ${input.aptitude.totalScore}/${input.aptitude.totalQuestions} (${input.aptitude.totalPercent}%)
+Aptitude Summary: ${input.aptitude.summary}
+`;
+  }
+
   const prompt = `
-You are a career counselor for Indian students. Suggest 3 personalized career options with all details, based on these assessments:
+You are a career counselor for Indian students. Suggest 3 personalized career options with comprehensive details, based on these assessments:
 
 Personality (HEXACO): 
 ${Object.entries(input.hexaco)
@@ -40,16 +63,25 @@ ${Object.entries(input.mi)
 
 Family Context: 
 ${input.familyContext}
+${aptitudeSection}
 
-For each career, provide in markdown:
+For each career, provide in markdown format with these exact sections:
+
 1. **Job Title**
-2. **Job Duties**
-3. **Key Skills Required**
-4. **Average Salary in INR (India, 2024)**
-5. **Typical Career Path**
-6. **Why this career fits the student’s profile**
+2. **Industry/Sector**
+3. **Job Duties** (3-4 key responsibilities)
+4. **Key Skills Required** (technical and soft skills)
+5. **Average Salary in INR (India, 2024)** (mention experience level)
+6. **Education/Training Required** (degree, certifications, courses)
+7. **Typical Career Path/Progression** (entry to senior level progression)
+8. **Cities/Regions with Most Opportunities** (top 3-4 Indian cities/regions)
+9. **Work Environment** (office, lab, remote, hybrid, outdoors, etc.)
+10. **Why this career matches the student's profile** (connect to their assessment results)
+11. **Alternative career options** (2-3 related careers with similar skill sets)
 
-Be specific, use Indian data, and match the recommendations to the profile.
+${input.isPaidTier && input.aptitude ? 'Consider the aptitude test results to suggest careers that align with the student\'s cognitive abilities and reasoning skills. Higher aptitude scores may indicate suitability for more analytical or complex roles.' : ''}
+
+Be specific, use current Indian data, and ensure each recommendation is tailored to the student's unique profile. Focus on practical, achievable career paths with good growth potential.
 `;
 
   try {
