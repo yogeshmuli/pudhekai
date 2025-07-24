@@ -1,24 +1,50 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { initializeApp, getApps } from "firebase/app";
+
+// Firebase client config (use your .env values)
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  // ...other config if needed
+};
+
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
 
 export const login = createAsyncThunk(
   "auth/login",
   async (
     { username, password }: { username: string; password: string },
-    thunkAPI
+    { rejectWithValue }
   ) => {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        username,
+        password
+      );
+      const idToken = await userCredential.user.getIdToken();
 
-    if (!res.ok) {
+      // Send ID token to your Next.js API route
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
       const data = await res.json();
-      throw new Error(data.message || "Login failed");
-    }
 
-    // Cookie is set by the API route, just return success
-    return true;
+      if (!data.success) {
+        return rejectWithValue(data.message || "Login failed");
+      }
+
+      return { uid: data.uid, email: username };
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Login error");
+    }
   }
 );
 

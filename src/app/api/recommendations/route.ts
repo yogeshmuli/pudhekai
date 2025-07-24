@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
 
     const recommendations = await getCareerRecommendations(input);
 
-    return NextResponse.json({ recommendations });
+    // return NextResponse.json({ recommendations });
+    return NextResponse.json("Hello", { status: 200 });
   } catch (error: any) {
     console.error("Career Recommendation Error:", error);
     return NextResponse.json(

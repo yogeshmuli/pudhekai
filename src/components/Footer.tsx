@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const footerSections = [
     {
@@ -22,7 +23,7 @@ const footerSections = [
     {
         key: "getStarted",
         title: "Get Started",
-        button: { label: "Start Assessment", url: "#" },
+        button: { label: "Start Assessment", url: "/preassessment" },
     },
 ];
 
@@ -70,17 +71,17 @@ export default function Footer() {
                                 <ul className="space-y-2 text-gray-400">
                                     {section.links.map((link) => (
                                         <li key={link.label}>
-                                            <a href={link.url} className="hover:text-white cursor-pointer">
+                                            <Link href={link.url} className="hover:text-white cursor-pointer">
                                                 {link.label}
-                                            </a>
+                                            </Link>
                                         </li>
                                     ))}
                                 </ul>
                             )}
                             {section.button && (
-                                <button className="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-lg transition-colors">
+                                <Link href={section.button.url} className="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-lg transition-colors inline-block">
                                     {section.button.label}
-                                </button>
+                                </Link>
                             )}
                         </div>
                     ))}
