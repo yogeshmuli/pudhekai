@@ -14,7 +14,7 @@ export type UserResponses = { [id: string]: number };
 // Load Questions from JSON
 function loadQuestions(): RiasecQuestion[] {
   try {
-    const jsonPath = path.join(process.cwd(), "src/services/riasec_questions.json");
+    const jsonPath = path.join(process.cwd(), "src/data/riasec_questions.json");
     console.log("Loading RIASEC questions from:", jsonPath);
     const data = fs.readFileSync(jsonPath, "utf8");
     return JSON.parse(data) as RiasecQuestion[];

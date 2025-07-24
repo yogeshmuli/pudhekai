@@ -16,7 +16,7 @@ export type AssessmentType = "free" | "paid";
 // Load questions from JSON file (sync for simplicity)
 function loadQuestions(): HexacoQuestion[] {
   try {
-    const jsonPath = path.join(process.cwd(), "src/services/hexaco_questions.json");
+    const jsonPath = path.join(process.cwd(), "src/data/hexaco_questions.json");
     console.log("Loading questions from:", jsonPath);
     const data = fs.readFileSync(jsonPath, "utf8");
     return JSON.parse(data) as HexacoQuestion[];
