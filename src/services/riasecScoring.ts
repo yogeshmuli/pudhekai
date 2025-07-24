@@ -6,7 +6,13 @@ import { collection, getDocs } from "firebase/firestore";
 // Question Type
 export type RiasecQuestion = {
   id: string;
-  category: "Realistic" | "Investigative" | "Artistic" | "Social" | "Enterprising" | "Conventional";
+  category:
+    | "Realistic"
+    | "Investigative"
+    | "Artistic"
+    | "Social"
+    | "Enterprising"
+    | "Conventional";
   text: string;
 };
 
@@ -41,7 +47,7 @@ function selectQuestions(
   const nPerCategory = assessmentType === "free" ? 2 : 5;
   const grouped: { [category: string]: RiasecQuestion[] } = {};
 
-  allQuestions.forEach(q => {
+  allQuestions.forEach((q) => {
     grouped[q.category] = grouped[q.category] || [];
     grouped[q.category].push(q);
   });
@@ -82,5 +88,5 @@ export async function getRiasecResult(
   const allQuestions = await fetchRiasecQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const categoryScores = scoreRiasec(selectedQuestions, userResponses);
-  return { categoryScores, questionsUsed: selectedQuestions.map(q => q.id) };
+  return { categoryScores, questionsUsed: selectedQuestions.map((q) => q.id) };
 }

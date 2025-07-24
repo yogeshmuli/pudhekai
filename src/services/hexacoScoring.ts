@@ -87,5 +87,5 @@ export async function getHexacoResult(
   const allQuestions = await fetchHexacoQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const traitScores = scoreHexaco(selectedQuestions, userResponses);
-  return { traitScores, questionsUsed: selectedQuestions.map(q => q.id) };
+  return { traitScores, questionsUsed: selectedQuestions.map((q) => q.id) };
 }

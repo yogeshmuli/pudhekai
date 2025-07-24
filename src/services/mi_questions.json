@@ -1,0 +1,10 @@
+[
+    {"id": "mi1", "intelligence": "Linguistic", "text": "I enjoy reading books and writing stories or essays."},
+    {"id": "mi2", "intelligence": "Logical-Mathematical", "text": "I like solving math problems and logical puzzles."},
+    {"id": "mi3", "intelligence": "Spatial", "text": "I can easily picture objects in my mind from different angles."},
+    {"id": "mi4", "intelligence": "Bodily-Kinesthetic", "text": "I like to move, dance, or participate in sports."},
+    {"id": "mi5", "intelligence": "Musical", "text": "I can easily recognize melodies and rhythms."},
+    {"id": "mi6", "intelligence": "Interpersonal", "text": "I enjoy working in groups and understanding other people."},
+    {"id": "mi7", "intelligence": "Intrapersonal", "text": "I spend time thinking about my goals and emotions."},
+    {"id": "mi8", "intelligence": "Naturalistic", "text": "I like to be outdoors and am interested in nature."}
+  ]
