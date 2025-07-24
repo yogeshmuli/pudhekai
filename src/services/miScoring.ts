@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import { db } from "./firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 // For MI, NIH, LearningStyle, Reasoning
 export type GenericQuestion = {
@@ -45,26 +47,33 @@ function scoreByDomain(
   return scores;
 }
 
+// Helper to fetch questions from Firestore
+async function fetchQuestionsFromFirestore(collectionName: string): Promise<GenericQuestion[]> {
+  const colRef = collection(db, collectionName);
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as GenericQuestion[];
+}
+
 // Usage for MI:
-export function getMIResult(userResponses: UserResponses) {
-  const questions = loadQuestions("mi_questions.json");
+export async function getMIResult(userResponses: UserResponses) {
+  const questions = await fetchQuestionsFromFirestore("questions_mi");
   return scoreByDomain(questions, userResponses, "intelligence");
 }
 
 // Usage for NIH:
-export function getNIHResult(userResponses: UserResponses) {
-  const questions = loadQuestions("nih_questions.json");
+export async function getNIHResult(userResponses: UserResponses) {
+  const questions = await fetchQuestionsFromFirestore("questions_nih");
   return scoreByDomain(questions, userResponses, "domain");
 }
 
 // Usage for Learning Style:
-export function getLearningStyleResult(userResponses: UserResponses) {
-  const questions = loadQuestions("learningstyle_questions.json");
+export async function getLearningStyleResult(userResponses: UserResponses) {
+  const questions = await fetchQuestionsFromFirestore("questions_learningstyle");
   return scoreByDomain(questions, userResponses, "style");
 }
 
 // Usage for Reasoning:
-export function getReasoningResult(userResponses: UserResponses) {
-  const questions = loadQuestions("reasoning_questions.json");
+export async function getReasoningResult(userResponses: UserResponses) {
+  const questions = await fetchQuestionsFromFirestore("questions_reasoning");
   return scoreByDomain(questions, userResponses, "domain");
 }

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid or missing responses" }, { status: 400 });
     }
 
-    const { traitScores, questionsUsed } = getHexacoResult(
+    const { traitScores, questionsUsed } = await getHexacoResult(
       responses as UserResponses,
       assessmentType as AssessmentType || "free"
     );

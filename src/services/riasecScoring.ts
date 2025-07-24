@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import { db } from "./firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 // Question Type
 export type RiasecQuestion = {
@@ -22,6 +24,13 @@ function loadQuestions(): RiasecQuestion[] {
     console.error("Failed to load RIASEC questions:", err);
     throw err;
   }
+}
+
+// Helper to fetch questions from Firestore
+async function fetchRiasecQuestions(): Promise<RiasecQuestion[]> {
+  const colRef = collection(db, "questions_riasec");
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as RiasecQuestion[];
 }
 
 // Select N questions per category (for free/paid version)
@@ -66,11 +75,11 @@ function scoreRiasec(
 }
 
 // Example main usage
-export function getRiasecResult(
+export async function getRiasecResult(
   userResponses: UserResponses,
   assessmentType: "free" | "paid" = "free"
 ) {
-  const allQuestions = loadQuestions();
+  const allQuestions = await fetchRiasecQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const categoryScores = scoreRiasec(selectedQuestions, userResponses);
   return { categoryScores, questionsUsed: selectedQuestions.map(q => q.id) };

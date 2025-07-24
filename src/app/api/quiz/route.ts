@@ -25,6 +25,11 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { getMIResult, getNIHResult, getLearningStyleResult, getReasoningResult } from "../../../services/miScoring";
+import { getHexacoResult } from "../../../services/hexacoScoring";
+import { getRiasecResult } from "../../../services/riasecScoring";
+import { db } from "../../../services/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 function shuffle<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
@@ -54,6 +59,13 @@ function selectPerGroup<T extends Record<string, any>>(items: T[], groupKey: str
   return selected;
 }
 
+// Helper to fetch questions from Firestore
+async function fetchQuestionsFromFirestore(collectionName: string): Promise<any[]> {
+  const colRef = collection(db, collectionName);
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -64,50 +76,35 @@ export async function GET(request: Request) {
 
     switch (test) {
       case "hexaco": {
-        const all = loadJson("hexaco_questions.json");
-        const n = type === "paid" ? 10 : 4;
-        questions = selectPerGroup(all, "trait", n);
+        questions = await fetchQuestionsFromFirestore("questions_hexaco");
         break;
       }
       case "riasec": {
-        const all = loadJson("riasec_questions.json");
-        const n = type === "paid" ? 5 : 2;
-        questions = selectPerGroup(all, "category", n);
+        questions = await fetchQuestionsFromFirestore("questions_riasec");
         break;
       }
       case "mi": {
-        const all = loadJson("mi_questions.json");
-        questions = selectPerGroup(all, "intelligence", 5);
+        questions = await fetchQuestionsFromFirestore("questions_mi");
         break;
       }
       case "nih": {
-        const all = loadJson("nih_questions.json");
-        const n = type === "paid" ? 2 : 1;
-        questions = selectPerGroup(all, "domain", n);
+        questions = await fetchQuestionsFromFirestore("questions_nih");
         break;
       }
       case "learningstyle": {
-        const all = loadJson("learningstyle_questions.json");
-        const n = type === "paid" ? 3 : 2;
-        questions = selectPerGroup(all, "style", n);
+        questions = await fetchQuestionsFromFirestore("questions_learningstyle");
         break;
       }
       case "reasoning": {
-        const all = loadJson("reasoning_questions.json");
-        const n = type === "paid" ? 2 : 1;
-        questions = selectPerGroup(all, "domain", n);
+        questions = await fetchQuestionsFromFirestore("questions_reasoning");
         break;
       }
-      case "family": {
-        const all = loadJson("familiy_questions.json");
-        questions = shuffle(all);
-        break;
-      }
+      // For family, you may need a similar Firestore fetch if migrated
       default:
         return NextResponse.json({ error: "Invalid test type" }, { status: 400 });
     }
 
-    questions = shuffle(questions);
+    // Optionally shuffle questions here if needed
     return NextResponse.json({ questions });
   } catch (error) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

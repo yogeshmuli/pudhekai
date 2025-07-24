@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid or missing responses" }, { status: 400 });
     }
 
-    const miScores = getMIResult(responses as UserResponses);
+    const miScores = await getMIResult(responses as UserResponses);
     return NextResponse.json({ miScores });
   } catch (error) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import { db } from "./firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export type HexacoQuestion = {
   id: string;
@@ -70,12 +72,19 @@ function scoreHexaco(
   return traitScores;
 }
 
+// Helper to fetch questions from Firestore
+async function fetchHexacoQuestions(): Promise<HexacoQuestion[]> {
+  const colRef = collection(db, "questions_hexaco");
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as HexacoQuestion[];
+}
+
 // Example usage in an API handler:
-export function getHexacoResult(
+export async function getHexacoResult(
   userResponses: UserResponses,
   assessmentType: AssessmentType = "free"
 ) {
-  const allQuestions = loadQuestions();
+  const allQuestions = await fetchHexacoQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const traitScores = scoreHexaco(selectedQuestions, userResponses);
   return { traitScores, questionsUsed: selectedQuestions.map(q => q.id) };
