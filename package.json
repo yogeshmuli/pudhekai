@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
+    "dev": "next dev",
     "build": "next build",
-    "dev2": "next dev",
     "start": "next start",
-    "lint": "next lint"
+    "test": "jest"
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
+    "@google/generative-ai": "^0.24.1",
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.11.0",
     "express": "^4.21.2",
@@ -29,11 +29,16 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/node-fetch": "^2.6.12",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4",
     "tailwindcss": "^4",
+    "ts-jest": "^29.4.0",
     "typescript": "^5"
   }
 }

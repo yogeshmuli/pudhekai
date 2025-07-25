@@ -64,13 +64,19 @@ export async function GET(request: Request) {
     // 2. Fetch all assessments
     const assessmentsSnap = await getDocs(collection(db, `users/${uid}/assessments`));
     const assessments = assessmentsSnap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+    console.log('Fetched assessments:', JSON.stringify(assessments, null, 2));
 
     // 3. For each required type, select the most recent assessment
     const latestByType: Record<string, any> = {};
     for (const type of REQUIRED_TYPES) {
-      const filtered = assessments.filter(a => a.type === type && a.createdAt?.toDate);
+      const filtered = assessments.filter(a => a.type === type);
       if (filtered.length > 0) {
-        filtered.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+        // Sort by createdAt, handling both Firestore timestamps and regular dates
+        filtered.sort((a, b) => {
+          const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+          const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+          return bTime.getTime() - aTime.getTime();
+        });
         latestByType[type] = filtered[0];
       }
     }
@@ -109,6 +115,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ recommendations });
   } catch (error) {
+    console.error('Recommendations error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

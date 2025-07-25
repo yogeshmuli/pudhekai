@@ -13,6 +13,7 @@ type RegisterRequestModel = {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    console.log('Register request data:', JSON.stringify(data, null, 2));
     if (!data) {
       return NextResponse.json(
         { error: "Invalid request data" },
