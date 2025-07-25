@@ -6,7 +6,7 @@ const footerSections = [
         key: "company",
         title: "Company",
         links: [
-            { label: "About", url: "#" },
+            { label: "About", url: "/about" },
             { label: "Contact", url: "#" },
             { label: "Careers", url: "#" },
         ],
