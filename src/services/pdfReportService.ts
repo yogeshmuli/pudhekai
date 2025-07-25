@@ -2,6 +2,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { CareerReport } from './reportService';
 
 export async function generateCareerReportPdf(report: CareerReport): Promise<Uint8Array> {
+  console.log('Starting PDF generation for report:', report.studentName);
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4 size
 
@@ -85,5 +86,6 @@ export async function generateCareerReportPdf(report: CareerReport): Promise<Uin
   });
 
   const pdfBytes = await pdfDoc.save();
+  console.log('PDF generated successfully, size:', pdfBytes.length);
   return pdfBytes;
 } 

@@ -118,11 +118,22 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
  *               summary: "pattern recognition: 8/10 (High), logical reasoning: 7/10 (Moderate)"
  */
 export async function GET() {
-  const filePath = path.join(process.cwd(), 'src/data/aptitude_questions.json');
-  const fileContents = await fs.readFile(filePath, 'utf-8');
-  const questions = JSON.parse(fileContents);
-  const sanitizedQuestions = (questions as Array<Record<string, unknown>>).map(({ answerIndex, ...rest }) => rest);
-  return NextResponse.json(sanitizedQuestions);
+  try {
+    const { db } = await import('@app/services/firebase');
+    const { collection, getDocs } = await import('firebase/firestore');
+    
+    const colRef = collection(db, "questions_aptitude");
+    const snapshot = await getDocs(colRef);
+    const questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const sanitizedQuestions = questions.map((question: any) => {
+      const { answerIndex, ...rest } = question;
+      return rest;
+    });
+    return NextResponse.json(sanitizedQuestions);
+  } catch (error) {
+    console.error('Error fetching aptitude questions:', error);
+    return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -138,10 +149,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid or missing responses' }, { status: 400 });
     }
 
-    // Load questionBank
-    const filePath = path.join(process.cwd(), 'src/data/aptitude_questions.json');
-    const fileContents = await fs.readFile(filePath, 'utf-8');
-    const questions = JSON.parse(fileContents);
+    // Load questionBank from Firebase
+    const { db } = await import('@app/services/firebase');
+    const { collection, getDocs } = await import('firebase/firestore');
+    
+    const colRef = collection(db, "questions_aptitude");
+    const snapshot = await getDocs(colRef);
+    const questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     const questionBank = questions.map((q: any) => ({ id: q.id, type: q.type, answerIndex: q.answerIndex }));
 
     const result = scoreAptitudeTest(questionBank, responses);

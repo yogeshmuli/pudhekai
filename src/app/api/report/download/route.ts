@@ -61,8 +61,15 @@ export async function GET(request: Request) {
   }
   // Generate report
   const report = generateCareerReport({ user, assessments, recommendations });
+  
+  console.log('Report data for PDF:', JSON.stringify(report, null, 2));
+  console.log('Report studentName:', report.studentName);
+  console.log('Report recommendations length:', report.recommendations?.length);
 
   const pdfBytes = await generateCareerReportPdf(report);
+  
+  console.log('PDF bytes length:', pdfBytes.length);
+  console.log('PDF bytes (first 100):', pdfBytes.slice(0, 100));
 
   return new NextResponse(pdfBytes, {
     status: 200,

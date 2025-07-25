@@ -19,19 +19,6 @@ export type RiasecQuestion = {
 // User Responses
 export type UserResponses = { [id: string]: number };
 
-// Load Questions from JSON
-function loadQuestions(): RiasecQuestion[] {
-  try {
-    const jsonPath = path.join(process.cwd(), "src/data/riasec_questions.json");
-    console.log("Loading RIASEC questions from:", jsonPath);
-    const data = fs.readFileSync(jsonPath, "utf8");
-    return JSON.parse(data) as RiasecQuestion[];
-  } catch (err) {
-    console.error("Failed to load RIASEC questions:", err);
-    throw err;
-  }
-}
-
 // Helper to fetch questions from Firestore
 async function fetchRiasecQuestions(): Promise<RiasecQuestion[]> {
   const colRef = collection(db, "questions_riasec");

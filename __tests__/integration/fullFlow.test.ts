@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 const serviceAccount = require('../../src/keys/serviceAccountKey.json');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3001';
 const TEST_EMAIL = `testuser${Date.now()}@example.com`;
 const TEST_PASSWORD = 'Test@1234';
 const TEST_FIRSTNAME = 'Test';
@@ -21,15 +21,78 @@ const adminDb = getFirestore();
 const adminAuth = getAuth();
 
 describe('Full User Flow Integration Test', () => {
+  // Increase timeout for this test suite
+  jest.setTimeout(60000); // 60 seconds
+  
   afterAll(async () => {
     if (uid) {
-      const userRef = adminDb.collection('users').doc(uid);
-      const assessments = await userRef.collection('assessments').listDocuments();
-      for (const doc of assessments) await doc.delete();
-      const recos = await userRef.collection('recommendations').listDocuments();
-      for (const doc of recos) await doc.delete();
-      await userRef.delete();
-      console.log(`Cleaned up test user: ${uid}`);
+      console.log('\n🧹 CLEANUP PHASE');
+      console.log('='.repeat(50));
+      console.log(`📋 Test User UID: ${uid}`);
+      console.log(`📧 Test User Email: ${TEST_EMAIL}`);
+      console.log(`🔗 Firebase Console URL: https://console.firebase.google.com/project/YOUR_PROJECT_ID/firestore/data/users/${uid}`);
+      console.log('\n📊 Data Summary:');
+      
+      try {
+        const userRef = adminDb.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          console.log(`👤 User Data: ${JSON.stringify(userData, null, 2)}`);
+        }
+        
+        // Check assessments
+        const assessments = await userRef.collection('assessments').listDocuments();
+        console.log(`📝 Assessments Found: ${assessments.length}`);
+        for (const doc of assessments) {
+          const data = await doc.get();
+          console.log(`  - ${doc.id} (${data.data()?.type || 'unknown'}): ${JSON.stringify(data.data(), null, 2)}`);
+        }
+        
+        // Check recommendations
+        const recos = await userRef.collection('recommendations').listDocuments();
+        console.log(`💡 Recommendations Found: ${recos.length}`);
+        for (const doc of recos) {
+          const data = await doc.get();
+          console.log(`  - ${doc.id}: ${JSON.stringify(data.data(), null, 2)}`);
+        }
+        
+        console.log('\n⚠️  DATA CLEANUP');
+        console.log('='.repeat(50));
+        
+        // Check if we should skip the wait (for CI/CD or fast testing)
+        const skipWait = process.env.SKIP_CLEANUP_WAIT === 'true';
+        
+        if (skipWait) {
+          console.log('⏭️  Skipping wait (SKIP_CLEANUP_WAIT=true)');
+        } else {
+          console.log('The test data will be deleted in 10 seconds...');
+          console.log('You can inspect the data in Firebase Console before it gets deleted.');
+          console.log('To keep the data for inspection, press Ctrl+C to stop the test.');
+          console.log('To skip wait, set SKIP_CLEANUP_WAIT=true');
+          
+          // Wait 10 seconds for manual inspection (reduced from 30)
+          await new Promise(resolve => setTimeout(resolve, 10000));
+        }
+        
+        // Cleanup
+        console.log('\n🗑️  Starting cleanup...');
+        for (const doc of assessments) {
+          await doc.delete();
+          console.log(`  ✅ Deleted assessment: ${doc.id}`);
+        }
+        for (const doc of recos) {
+          await doc.delete();
+          console.log(`  ✅ Deleted recommendation: ${doc.id}`);
+        }
+        await userRef.delete();
+        console.log(`  ✅ Deleted user: ${uid}`);
+        console.log('✅ Cleanup completed successfully!');
+        
+      } catch (error) {
+        console.error('❌ Error during cleanup:', error);
+      }
     }
   });
 
@@ -71,7 +134,16 @@ describe('Full User Flow Integration Test', () => {
   });
 
   it('should complete HEXACO assessment', async () => {
-    const responses = Array(60).fill(3); // Neutral responses for all questions
+    // Create realistic responses using actual Firebase question IDs (1-5 scale)
+    const responses: { [key: string]: number } = {};
+    const hexacoIds = ['a1', 'a10', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'c1', 'c10', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'e1', 'e10', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e9', 'h1', 'h10', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'o1', 'o10', 'o2', 'o3', 'o4', 'o5', 'o6', 'o7', 'o8', 'o9', 'x1', 'x10', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8', 'x9'];
+    
+    // Use first 24 questions (4 per trait for free assessment)
+    const selectedIds = hexacoIds.slice(0, 24);
+    for (const questionId of selectedIds) {
+      responses[questionId] = Math.floor(Math.random() * 5) + 1; // Random 1-5
+    }
+    
     const res = await request(BASE_URL)
       .post('/api/hexaco')
       .set('Cookie', `auth_token=${authToken}`)
@@ -86,7 +158,16 @@ describe('Full User Flow Integration Test', () => {
   });
 
   it('should complete RIASEC assessment', async () => {
-    const responses = Array(30).fill(3); // Neutral responses for all questions
+    // Create realistic responses using actual Firebase question IDs (1-5 scale)
+    const responses: { [key: string]: number } = {};
+    const riasecIds = ['a1', 'a2', 'a3', 'a4', 'a5', 'c1', 'c2', 'c3', 'c4', 'c5', 'e1', 'e2', 'e3', 'e4', 'e5', 'i1', 'i2', 'i3', 'i4', 'i5', 'r1', 'r2', 'r3', 'r4', 'r5', 's1', 's2', 's3', 's4', 's5'];
+    
+    // Use first 12 questions (2 per category for free assessment)
+    const selectedIds = riasecIds.slice(0, 12);
+    for (const questionId of selectedIds) {
+      responses[questionId] = Math.floor(Math.random() * 5) + 1; // Random 1-5
+    }
+    
     const res = await request(BASE_URL)
       .post('/api/riasec')
       .set('Cookie', `auth_token=${authToken}`)
@@ -101,7 +182,15 @@ describe('Full User Flow Integration Test', () => {
   });
 
   it('should complete MI assessment', async () => {
-    const responses = Array(40).fill(3); // Neutral responses for all questions
+    // Create realistic responses using actual Firebase question IDs (1-5 scale)
+    const responses: { [key: string]: number } = {};
+    const miIds = ['mi1', 'mi2', 'mi3', 'mi4', 'mi5', 'mi6', 'mi7', 'mi8'];
+    
+    // Use all 8 MI questions
+    for (const questionId of miIds) {
+      responses[questionId] = Math.floor(Math.random() * 5) + 1; // Random 1-5
+    }
+    
     const res = await request(BASE_URL)
       .post('/api/mi')
       .set('Cookie', `auth_token=${authToken}`)
@@ -116,13 +205,22 @@ describe('Full User Flow Integration Test', () => {
   });
 
   it('should complete Family assessment', async () => {
-    const responses = Array(20).fill(3); // Neutral responses for all questions
+    // Create realistic string responses for family context
+    const responses: { [key: string]: string } = {
+      fc1: "Middle Income",
+      fc2: "City / Urban area", 
+      fc3: "Undergraduate degree / Diploma",
+      fc4: "Salaried Job",
+      fc5: "Supportive within family circumstances",
+      fc6: "Some, but not in my immediate family",
+      fc7: "Regional + Hindi/English",
+      fc8: "No, always lived in the same place"
+    };
     const res = await request(BASE_URL)
       .post('/api/family')
       .set('Cookie', `auth_token=${authToken}`)
       .send({
-        responses,
-        assessmentType: 'free'
+        responses
       });
     console.log('Family status:', res.status);
     console.log('Family response:', res.body);
@@ -131,13 +229,20 @@ describe('Full User Flow Integration Test', () => {
   });
 
   it('should complete Aptitude assessment', async () => {
-    const responses = Array(50).fill(3); // Neutral responses for all questions
+    // Create realistic answer indices using actual Firebase question IDs (0-3 for multiple choice)
+    const responses: { [key: string]: number } = {};
+    const aptitudeIds = ['cr1', 'cr10', 'cr2', 'cr3', 'cr4', 'cr5', 'cr6', 'cr7', 'cr8', 'cr9', 'lr1', 'lr10', 'lr2', 'lr3', 'lr4', 'lr5', 'lr6', 'lr7', 'lr8', 'lr9', 'nr1', 'nr10', 'nr2', 'nr3', 'nr4', 'nr5', 'nr6', 'nr7', 'nr8', 'nr9', 'pr1', 'pr10', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6', 'pr7', 'pr8', 'pr9'];
+    
+    // Use all 40 aptitude questions
+    for (const questionId of aptitudeIds) {
+      responses[questionId] = Math.floor(Math.random() * 4); // Random 0-3
+    }
+    
     const res = await request(BASE_URL)
       .post('/api/aptitude')
       .set('Cookie', `auth_token=${authToken}`)
       .send({
-        responses,
-        assessmentType: 'free'
+        responses
       });
     console.log('Aptitude status:', res.status);
     console.log('Aptitude response:', res.body);
