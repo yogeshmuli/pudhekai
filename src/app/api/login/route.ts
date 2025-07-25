@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { initializeApp, cert, getApps } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
 
-// Only initialize once
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)
-    ),
-  });
-}
-const adminAuth = getAuth();
+import { getAuth } from "firebase-admin/auth";
 
 export async function POST(request: Request) {
   const { idToken } = await request.json();
 
   try {
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const decodedToken = await getAuth().verifyIdToken(idToken);
 
     // Set cookie
     (await cookies()).set("auth_token", idToken, {
@@ -41,7 +31,7 @@ export async function GET() {
   const token = (await cookies()).get("auth_token")?.value;
   if (token) {
     try {
-      const decodedToken = await adminAuth.verifyIdToken(token);
+      const decodedToken = await getAuth().verifyIdToken(token);
       return NextResponse.json({ authenticated: true, uid: decodedToken.uid });
     } catch {
       return NextResponse.json({ authenticated: false });

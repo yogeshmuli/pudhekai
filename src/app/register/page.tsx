@@ -3,6 +3,10 @@ import React, { useState } from "react";
 import { FaUserPlus, FaGoogle, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser, FaCalendar, FaGraduationCap } from "react-icons/fa";
 import useForm from "@app/hooks/useForm";
 import Image from "next/image";
+import { register } from "@app/thunk/auth.thunk";
+import { useAppDispatch } from "@app/hooks";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 type RegisterFormValues = {
     firstname: string;
@@ -11,11 +15,14 @@ type RegisterFormValues = {
     dob: string;
     grade: string;
     password: string;
+    confirmPassword: string; // Added
     terms: boolean;
 };
 
 export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
+    const dispatch = useAppDispatch();
+    const router = useRouter();
 
     const validate = (name: keyof RegisterFormValues, value: any, values: RegisterFormValues): string | null => {
         if (name === "firstname" && !value) return "First name is required";
@@ -24,6 +31,7 @@ export default function Register() {
         if (name === "dob" && !value) return "Date of birth is required";
         if (name === "grade" && !value) return "Grade is required";
         if (name === "password" && value.length < 6) return "Password must be at least 6 characters";
+        if (name === "confirmPassword" && value !== values.password) return "Passwords do not match";
         if (name === "terms" && !value) return "You must agree to the terms";
         return null;
     };
@@ -36,6 +44,7 @@ export default function Register() {
             dob: "",
             grade: "",
             password: "",
+            confirmPassword: "",
             terms: false,
         },
         validate
@@ -43,9 +52,31 @@ export default function Register() {
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        handleSubmit((formValues: any) => {
+        handleSubmit(async (formValues: any) => {
             // Submit logic here
-            console.log("Register form submitted", formValues);
+            let requestObject = {
+                uid: "", // This should be set after user creation
+                firstName: formValues.firstname,
+                lastName: formValues.lastname,
+                email: formValues.email,
+                dateOfBirth: formValues.dob,
+                currentGrade: formValues.grade,
+                password: formValues.password,
+            };
+            let res = await dispatch(register(requestObject)).unwrap();
+            if (res.success) {
+                // Handle successful registration
+                toast.success("Registration successful!");
+                router.push("/login"); // Redirect to login or dashboard
+            } else {
+                // Handle registration error
+                toast.error(res.error || "Registration failed");
+            }
+
+
+
+
+
         });
     };
 
@@ -229,6 +260,26 @@ export default function Register() {
                             </div>
                         </div>
                         {errors.password && <p className="text-red-500 text-xs mt-2">{errors.password}</p>}
+                    </div>
+
+                    <div id="confirm-password-field">
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaLock className="text-gray-400" />
+                            </div>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                required
+                                className={`block w-full pl-10 pr-10 py-3 border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 ${errors.confirmPassword ? "focus:ring-red-500" : "focus:ring-primary"} focus:border-transparent`}
+                                placeholder="Confirm password"
+                                value={values.confirmPassword}
+                                onChange={e => handleChange("confirmPassword", e.target.value)}
+                            />
+                        </div>
+                        {errors.confirmPassword && <p className="text-red-500 text-xs mt-2">{errors.confirmPassword}</p>}
                     </div>
 
                     <div id="terms-field" className="flex items-center">
