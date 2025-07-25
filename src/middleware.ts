@@ -4,13 +4,30 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("auth_token")?.value;
 
+  // Allow /api/login and /api/register without auth
+  if (
+    request.nextUrl.pathname.startsWith("/api/login") ||
+    request.nextUrl.pathname.startsWith("/api/register")
+  ) {
+    return NextResponse.next();
+  }
+
+  // Protect all other API routes: only check for presence of cookie
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    if (!token) {
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return NextResponse.next();
+  }
+
   // Default route logic
   if (request.nextUrl.pathname === "/") {
     if (token) {
-      // Authenticated: redirect to homepage
       return NextResponse.redirect(new URL("/home", request.url));
     } else {
-      // Not authenticated: redirect to landing
       return NextResponse.redirect(new URL("/landing", request.url));
     }
   }
@@ -35,5 +52,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|favicon.ico).*)"],
+  matcher: ["/((?!_next|favicon.ico).*)"],
 };
