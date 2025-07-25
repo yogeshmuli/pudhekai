@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const footerSections = [
     {
@@ -34,7 +35,10 @@ export default function Footer() {
                 <div className="grid md:grid-cols-4 gap-8">
                     {/* Brand & Social */}
                     <div>
-                        <div className="text-2xl font-bold text-primary mb-4">PudheKai</div>
+                        <div className="flex items-center gap-2 text-2xl font-bold mb-4">
+                            <Image src="/logo-icon.svg" alt="PudheKai Logo" width={32} height={32} className="h-8 w-8" priority />
+                            <span><span className="text-gray-300">PudheK</span><span className="text-primary">ai</span></span>
+                        </div>
                         <p className="text-gray-400 mb-4">AI-powered career guidance for young minds</p>
                         <div className="flex gap-4">
                             {/* Facebook */}

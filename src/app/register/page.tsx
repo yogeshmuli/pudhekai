@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { FaUserPlus, FaGoogle, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser, FaCalendar, FaGraduationCap } from "react-icons/fa";
 import useForm from "@app/hooks/useForm";
+import Image from "next/image";
 
 type RegisterFormValues = {
     firstname: string;
@@ -53,8 +54,17 @@ export default function Register() {
             <div id="register-card" className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 space-y-8">
                 <div id="register-header" className="text-center">
                     <div className="flex justify-center mb-6">
-                        <div className="bg-gradient-to-r from-primary to-primary rounded-full p-3">
-                            <FaUserPlus className="text-white text-2xl" />
+                        <div className="bg-primary rounded-full p-3 flex items-center justify-center">
+                            <div className="bg-white rounded-full p-1 flex items-center justify-center">
+                                <Image
+                                    src="/logo-icon.svg"
+                                    alt="PudheKai Logo"
+                                    width={28}
+                                    height={28}
+                                    className="h-7 w-7"
+                                    priority
+                                />
+                            </div>
                         </div>
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
