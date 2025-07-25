@@ -17,7 +17,6 @@ function useForm<T extends Record<string, any>>(
   const [dirty, setDirty] = useState(false);
 
   const handleChange = (name: keyof T, value: T[keyof T]) => {
-    debugger;
     setValues({ ...values, [name]: value });
     if (dirty && validate) {
       setErrors({ ...errors, [name]: validate(name, value, values) });

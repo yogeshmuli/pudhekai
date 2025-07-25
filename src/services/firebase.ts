@@ -13,7 +13,9 @@ import {
   cert,
   getApps as getAdminApps,
   getApp as getAdminApp,
+  App as AdminApp,
 } from "firebase-admin/app";
+import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import serviceAccount from "../../src/keys/serviceAccountKey.json";
 
 // --- Client SDK Initialization ---
@@ -36,7 +38,7 @@ export const auth = getAuth(clientApp);
 export const googleProvider = new GoogleAuthProvider();
 
 // --- Admin SDK Initialization ---
-let adminApp;
+let adminApp: AdminApp;
 if (!getAdminApps().length) {
   adminApp = initAdminApp({
     credential: cert(serviceAccount as any),
@@ -44,5 +46,7 @@ if (!getAdminApps().length) {
 } else {
   adminApp = getAdminApp();
 }
+
+export const adminAuth = getAdminAuth(adminApp);
 
 export { adminApp };

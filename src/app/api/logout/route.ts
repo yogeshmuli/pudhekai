@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     //   secure: process.env.NODE_ENV === "production",
     // });
     (await cookies()).delete("auth_token");
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Logout Error:", error);

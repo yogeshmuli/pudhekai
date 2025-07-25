@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { adminApp } from "@app/services/firebase";
+import type { App } from "firebase-admin/app";
 
 import { getAuth } from "firebase-admin/auth";
 
@@ -7,7 +9,7 @@ export async function POST(request: Request) {
   const { idToken } = await request.json();
 
   try {
-    const decodedToken = await getAuth().verifyIdToken(idToken);
+    const decodedToken = await getAuth(adminApp as App).verifyIdToken(idToken);
 
     // Set cookie
     (await cookies()).set("auth_token", idToken, {
