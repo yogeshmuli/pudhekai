@@ -1,6 +1,43 @@
-import React from "react";
+"use client";
+import React, { useState, useRef } from "react";
+import { useAppDispatch } from "@app/hooks";
+import { logout } from "@app/thunk/auth.thunk";
 
 export default function DashboardHeader() {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const imgRef = useRef<HTMLImageElement>(null);
+
+    // Close dropdown when clicking outside
+    React.useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            if (
+                imgRef.current &&
+                !imgRef.current.contains(e.target as Node) &&
+                !(e.target as HTMLElement)?.closest("#profile-dropdown")
+            ) {
+                setDropdownOpen(false);
+            }
+        }
+        if (dropdownOpen) {
+            document.addEventListener("mousedown", handleClick);
+        }
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [dropdownOpen]);
+
+    const handleLogout = async () => {
+        try {
+            // Add your logout logic here
+            console.log("Logout clicked");
+            setDropdownOpen(false);
+            let res = await dispatch(logout()).unwrap();
+        } catch (error) {
+            console.error("Logout Error:", error);
+        }
+
+
+    };
+
     return (
         <header id="header" className="bg-primary px-8 py-6">
             <div className="flex items-center justify-between">
@@ -19,7 +56,7 @@ export default function DashboardHeader() {
                     </div>
                 </div>
                 {/* Right: Actions */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 relative">
                     <button className="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/30 transition-colors">
                         <span className="text-lg">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="bell" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width={22} height={22}>
@@ -27,11 +64,29 @@ export default function DashboardHeader() {
                             </svg>
                         </span>
                     </button>
-                    <img
-                        src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg"
-                        alt="Profile"
-                        className="w-10 h-10 rounded-full border-2 border-white/50"
-                    />
+                    <div className="relative">
+                        <img
+                            ref={imgRef}
+                            src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg"
+                            alt="Profile"
+                            className="w-10 h-10 rounded-full border-2 border-white/50 cursor-pointer"
+                            onClick={() => setDropdownOpen((open) => !open)}
+                        />
+                        {dropdownOpen && (
+                            <div
+                                id="profile-dropdown"
+                                className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50"
+                            >
+                                <button
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
+                                    onClick={handleLogout}
+                                >
+                                    Logout
+                                </button>
+                                {/* Add more actions here if needed */}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>

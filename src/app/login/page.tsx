@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FaGraduationCap, FaGoogle, FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import useForm from "@app/hooks/useForm";
 import Link from "next/link";
+import { toast, Toaster } from "react-hot-toast";
 
 type LoginFormValues = { email: string; password: string };
 
@@ -34,18 +35,20 @@ export default function Login() {
     // Submit handler
     const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
-        // Validate all fields on submit
-        let newErrors: Record<keyof LoginFormValues, string | null> = { email: null, password: null };
-        (Object.keys(values) as Array<keyof LoginFormValues>).forEach((key) => {
-            newErrors[key] = validate(key, values[key], values);
-        });
-        setErrors(newErrors);
-        const hasError = Object.values(newErrors).some((e) => e);
-        if (hasError) return;
+        try {
+            // Validate all fields on submit
+            let newErrors: Record<keyof LoginFormValues, string | null> = { email: null, password: null };
+            (Object.keys(values) as Array<keyof LoginFormValues>).forEach((key) => {
+                newErrors[key] = validate(key, values[key], values);
+            });
+            setErrors(newErrors);
+            const hasError = Object.values(newErrors).some((e) => e);
+            if (hasError) return;
 
-        const resultAction = await dispatch(login({ username: values.email, password: values.password }));
-        if ((login.fulfilled as any).match(resultAction)) {
+            const resultAction = await dispatch(login({ username: values.email, password: values.password })).unwrap();
             router.push("/home");
+        } catch (error) {
+            toast.error("Login failed. Please check your credentials.");
         }
     };
 

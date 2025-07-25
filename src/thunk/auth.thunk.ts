@@ -1,13 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
 
 // Firebase client config (use your .env values)
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-  // ...other config if needed
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
 };
 
 if (!getApps().length) {
@@ -48,29 +56,82 @@ export const login = createAsyncThunk(
   }
 );
 
-const authSlice = createSlice({
-  name: "auth",
-  initialState: {
-    isAuthenticated: false,
-    loading: false,
-    error: null as string | null,
-  },
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state) => {
-        state.loading = false;
-        state.isAuthenticated = true;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Login failed";
-      });
-  },
-});
+// thunk for registering a new user
+export const register = createAsyncThunk(
+  "auth/register",
+  async (
+    {
+      uid,
+      firstName,
+      lastName,
+      email,
+      password,
+      dateOfBirth,
+      currentGrade,
+    }: {
+      uid: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      dateOfBirth: string;
+      currentGrade: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      // first create the user in Firebase Auth
+      const auth = getAuth();
+      let newUser = await createUserWithEmailAndPassword(auth, email, password);
+      if (!newUser.user) {
+        return rejectWithValue("User creation failed");
+      }
 
-export default authSlice.reducer;
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: newUser.user.uid,
+          firstName,
+          lastName,
+          email,
+          dateOfBirth,
+          currentGrade,
+        }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        return rejectWithValue(data.error || "Registration failed");
+      }
+
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Registration error");
+    }
+  }
+);
+
+// thunk for logout
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const auth = getAuth();
+      await auth.signOut();
+
+      // clear the auth token cookie
+      const res = await fetch("/api/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
+        return rejectWithValue("Logout failed");
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Logout error");
+    }
+  }
+);

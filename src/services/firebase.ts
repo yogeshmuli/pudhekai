@@ -1,21 +1,48 @@
-// Firebase utility for server/client usage
-import { initializeApp, getApps, getApp } from "firebase/app";
+// --- Client SDK ---
+import {
+  initializeApp as initClientApp,
+  getApps as getClientApps,
+  getApp as getClientApp,
+} from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
+// --- Admin SDK ---
+import {
+  initializeApp as initAdminApp,
+  cert,
+  getApps as getAdminApps,
+  getApp as getAdminApp,
+} from "firebase-admin/app";
+import serviceAccount from "../../src/keys/serviceAccountKey.json";
 
+// --- Client SDK Initialization ---
 const firebaseConfig = {
-  apiKey: "AIzaSyCf1KKEXvMsmZB_Wyn-HBKBL1pK3hrEqkA",
-  authDomain: "pudhekai-22a9c.firebaseapp.com",
-  projectId: "pudhekai-22a9c",
-  storageBucket: "pudhekai-22a9c.appspot.com",
-  messagingSenderId: "114108754350",
-  appId: "1:114108754350:web:f1e80b2f1e1f94953a003f",
-  measurementId: "G-VX4R08CND4"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
 };
 
-// Prevent re-initialization in hot-reload/dev
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-export const db = getFirestore(app); 
-export const auth = getAuth(app);
+const clientApp = getClientApps().length
+  ? getClientApp()
+  : initClientApp(firebaseConfig);
+
+export const db = getFirestore(clientApp);
+export const auth = getAuth(clientApp);
 export const googleProvider = new GoogleAuthProvider();
+
+// --- Admin SDK Initialization ---
+let adminApp;
+if (!getAdminApps().length) {
+  adminApp = initAdminApp({
+    credential: cert(serviceAccount as any),
+  });
+} else {
+  adminApp = getAdminApp();
+}
+
+export { adminApp };
