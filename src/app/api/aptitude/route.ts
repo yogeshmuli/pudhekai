@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { scoreAptitudeTest } from '../../../services/aptitude Scoring';
+import { getUserFromRequest } from '@app/utils/getUserFromRequest';
+import { db } from '@app/services/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
  * @swagger
@@ -42,9 +45,9 @@ import { scoreAptitudeTest } from '../../../services/aptitude Scoring';
  *                 options: ["18", "24", "32", "20"]
  *   post:
  *     summary: Calculate aptitude test score
+ *     description: Calculates and returns the score for aptitude test responses
  *     tags:
  *       - Assessment & Results
- *     description: Calculates and returns the score for aptitude test responses
  *     requestBody:
  *       required: true
  *       content:
@@ -123,13 +126,40 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const filePath = path.join(process.cwd(), 'src/data/aptitude_questions.json');
-  const fileContents = await fs.readFile(filePath, 'utf-8');
-  const questions = JSON.parse(fileContents);
-  // Only use id, type, and answerIndex for scoring
-  const questionBank = questions.map((q: any) => ({ id: q.id, type: q.type, answerIndex: q.answerIndex }));
-  const body = await request.json();
-  const responses = body.responses;
-  const result = scoreAptitudeTest(questionBank, responses);
-  return NextResponse.json(result);
+  try {
+    // Get logged-in user UID
+    const uid = await getUserFromRequest(request);
+    if (!uid) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { responses } = await request.json();
+    if (!responses || typeof responses !== 'object') {
+      return NextResponse.json({ error: 'Invalid or missing responses' }, { status: 400 });
+    }
+
+    // Load questionBank
+    const filePath = path.join(process.cwd(), 'src/data/aptitude_questions.json');
+    const fileContents = await fs.readFile(filePath, 'utf-8');
+    const questions = JSON.parse(fileContents);
+    const questionBank = questions.map((q: any) => ({ id: q.id, type: q.type, answerIndex: q.answerIndex }));
+
+    const result = scoreAptitudeTest(questionBank, responses);
+
+    // Save to Firestore under users/{uid}/assessments
+    const assessmentData = {
+      type: 'aptitude',
+      categories: result.categories,
+      totalScore: result.totalScore,
+      totalQuestions: result.totalQuestions,
+      totalPercent: result.totalPercent,
+      summary: result.summary,
+      createdAt: serverTimestamp(),
+    };
+    await addDoc(collection(db, `users/${uid}/assessments`), assessmentData);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }

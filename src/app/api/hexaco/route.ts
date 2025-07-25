@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getHexacoResult, UserResponses, AssessmentType } from "../../../services/hexacoScoring";
+import { getUserFromRequest } from "@app/utils/getUserFromRequest";
+import { db } from "@app/services/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 /**
  * @openapi
@@ -28,6 +31,12 @@ import { getHexacoResult, UserResponses, AssessmentType } from "../../../service
  */
 export async function POST(request: Request) {
   try {
+    // Get logged-in user UID
+    const uid = await getUserFromRequest(request);
+    if (!uid) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { responses, assessmentType } = await request.json();
     if (!responses || typeof responses !== "object") {
       return NextResponse.json({ error: "Invalid or missing responses" }, { status: 400 });
@@ -37,6 +46,16 @@ export async function POST(request: Request) {
       responses as UserResponses,
       assessmentType as AssessmentType || "free"
     );
+
+    // Save to Firestore under users/{uid}/assessments
+    const assessmentData = {
+      type: "hexaco",
+      traitScores,
+      questionsUsed,
+      assessmentType: assessmentType || "free",
+      createdAt: serverTimestamp(),
+    };
+    await addDoc(collection(db, `users/${uid}/assessments`), assessmentData);
 
     return NextResponse.json({ traitScores, questionsUsed });
   } catch (error) {
