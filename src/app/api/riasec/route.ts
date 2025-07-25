@@ -6,6 +6,8 @@ import { getRiasecResult, UserResponses } from "../../../services/riasecScoring"
  * /api/riasec:
  *   post:
  *     summary: Calculate RIASEC category scores
+ *     tags:
+ *       - Assessment & Results
  *     requestBody:
  *       required: true
  *       content:

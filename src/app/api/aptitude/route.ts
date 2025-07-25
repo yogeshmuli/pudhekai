@@ -8,9 +8,9 @@ import { scoreAptitudeTest } from '../../../services/aptitude Scoring';
  * /api/aptitude:
  *   get:
  *     summary: Get all aptitude test questions
- *     description: Retrieves all aptitude test questions without answer indices for client-side display
  *     tags:
- *       - Aptitude Test
+ *       - Assessment & Results
+ *     description: Retrieves all aptitude test questions without answer indices for client-side display
  *     responses:
  *       200:
  *         description: List of aptitude questions (without answers)
@@ -42,9 +42,9 @@ import { scoreAptitudeTest } from '../../../services/aptitude Scoring';
  *                 options: ["18", "24", "32", "20"]
  *   post:
  *     summary: Calculate aptitude test score
- *     description: Calculates and returns the score for aptitude test responses
  *     tags:
- *       - Aptitude Test
+ *       - Assessment & Results
+ *     description: Calculates and returns the score for aptitude test responses
  *     requestBody:
  *       required: true
  *       content:

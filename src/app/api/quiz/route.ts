@@ -3,6 +3,8 @@
  * /api/quiz:
  *   get:
  *     summary: Generate a randomized quiz for a given test and assessment type
+ *     tags:
+ *       - Assessment & Results
  *     parameters:
  *       - in: query
  *         name: test

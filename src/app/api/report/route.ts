@@ -6,9 +6,9 @@ import { generateCareerReport, AssessmentSummary, CareerRecommendation } from '.
  * /api/report:
  *   get:
  *     summary: Generate comprehensive career assessment report
- *     description: Generates a detailed career assessment report based on assessment results. Currently returns a demo report with hardcoded data for demonstration purposes.
  *     tags:
  *       - Report Generation
+ *     description: Generates a detailed career assessment report based on assessment results. Currently returns a demo report with hardcoded data for demonstration purposes.
  *     responses:
  *       200:
  *         description: Comprehensive career assessment report

@@ -8,6 +8,8 @@ import {
  * /api/recommendations:
  *   post:
  *     summary: Get career recommendations based on assessment results
+ *     tags:
+ *       - Recommendations
  *     requestBody:
  *       required: true
  *       content:

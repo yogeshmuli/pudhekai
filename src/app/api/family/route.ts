@@ -6,6 +6,8 @@ import { summarizeFamilyProfile, FamilyContextResponse } from "../../../services
  * /api/family:
  *   post:
  *     summary: Summarize family context quiz responses
+ *     tags:
+ *       - Assessment & Results
  *     requestBody:
  *       required: true
  *       content:

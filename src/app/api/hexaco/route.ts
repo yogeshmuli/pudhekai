@@ -6,6 +6,8 @@ import { getHexacoResult, UserResponses, AssessmentType } from "../../../service
  * /api/hexaco:
  *   post:
  *     summary: Calculate HEXACO trait scores
+ *     tags:
+ *       - Assessment & Results
  *     requestBody:
  *       required: true
  *       content:

@@ -6,6 +6,8 @@ import { getMIResult, UserResponses } from "../../../services/miScoring";
  * /api/mi:
  *   post:
  *     summary: Calculate Multiple Intelligences (MI) scores
+ *     tags:
+ *       - Assessment & Results
  *     requestBody:
  *       required: true
  *       content:
