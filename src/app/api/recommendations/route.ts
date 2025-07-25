@@ -1,62 +1,114 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-  getCareerRecommendations,
-  CareerAssessmentInput,
-} from "../../../services/careerRecommendations";
+import { NextResponse } from "next/server";
+import { getUserFromRequest } from "@app/utils/getUserFromRequest";
+import { db } from "@app/services/firebase";
+import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { getCareerRecommendations } from "@app/services/careerRecommendations";
+
+const REQUIRED_TYPES = ["hexaco", "riasec", "mi", "family"];
+
 /**
  * @openapi
  * /api/recommendations:
- *   post:
- *     summary: Get career recommendations based on assessment results
+ *   get:
+ *     summary: Get career recommendations based on latest user assessments
  *     tags:
  *       - Recommendations
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               hexaco:
- *                 type: object
- *                 additionalProperties:
- *                   type: number
- *               riasec:
- *                 type: object
- *                 additionalProperties:
- *                   type: number
- *               mi:
- *                 type: object
- *                 additionalProperties:
- *                   type: number
- *               familyContext:
- *                 type: string
  *     responses:
  *       200:
- *         description: Career recommendations
+ *         description: Career recommendations based on latest assessments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 recommendations:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Missing required assessment(s)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized (no valid auth token)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  */
-// POST /api/career-recommendation
-export async function POST(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const input = (await req.json()) as CareerAssessmentInput;
-
-    // Validate input
-    if (!input.hexaco || !input.riasec || !input.mi || !input.familyContext) {
-      return NextResponse.json(
-        { error: "Incomplete assessment data." },
-        { status: 400 }
-      );
+    // 1. Get user UID
+    const uid = await getUserFromRequest(request);
+    if (!uid) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // 2. Fetch all assessments
+    const assessmentsSnap = await getDocs(collection(db, `users/${uid}/assessments`));
+    const assessments = assessmentsSnap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+
+    // 3. For each required type, select the most recent assessment
+    const latestByType: Record<string, any> = {};
+    for (const type of REQUIRED_TYPES) {
+      const filtered = assessments.filter(a => a.type === type && a.createdAt?.toDate);
+      if (filtered.length > 0) {
+        filtered.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+        latestByType[type] = filtered[0];
+      }
+    }
+
+    // 4. Check if any required assessment is missing
+    for (const type of REQUIRED_TYPES) {
+      if (!latestByType[type]) {
+        return NextResponse.json({ error: `Missing assessment: ${type}` }, { status: 400 });
+      }
+    }
+
+    // 5. Prepare input for recommendation service
+    const input = {
+      hexaco: latestByType.hexaco.traitScores,
+      riasec: latestByType.riasec.categoryScores,
+      mi: latestByType.mi.miScores,
+      familyContext: latestByType.family.summary,
+    };
+
+    // 6. Get recommendations
     const recommendations = await getCareerRecommendations(input);
 
-    // return NextResponse.json({ recommendations });
-    return NextResponse.json("Hello", { status: 200 });
-  } catch (error: any) {
-    console.error("Career Recommendation Error:", error);
-    return NextResponse.json(
-      { error: error?.message || "Failed to get career recommendations" },
-      { status: 500 }
-    );
+    // 7. Save recommendations to Firestore
+    const tier = latestByType.hexaco?.assessmentType || "Free";
+    await addDoc(collection(db, `users/${uid}/recommendations`), {
+      recommendations,
+      tier,
+      createdAt: serverTimestamp(),
+      inputAssessments: {
+        hexaco: latestByType.hexaco?.id,
+        riasec: latestByType.riasec?.id,
+        mi: latestByType.mi?.id,
+        family: latestByType.family?.id,
+      },
+    });
+
+    return NextResponse.json({ recommendations });
+  } catch (error) {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
