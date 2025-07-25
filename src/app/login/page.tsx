@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FaGraduationCap, FaGoogle, FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import useForm from "@app/hooks/useForm";
 import Link from "next/link";
+import Image from "next/image";
 import { toast, Toaster } from "react-hot-toast";
 
 type LoginFormValues = { email: string; password: string };
@@ -57,8 +58,17 @@ export default function Login() {
             <div id="login-card" className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-8">
                 <div id="login-header" className="text-center">
                     <div className="flex justify-center mb-6">
-                        <div className="bg-primary rounded-full p-3">
-                            <FaGraduationCap className="text-white text-2xl" />
+                        <div className="bg-primary rounded-full p-3 flex items-center justify-center">
+                            <div className="bg-white rounded-full p-1 flex items-center justify-center">
+                                <Image
+                                    src="/logo-icon.svg"
+                                    alt="PudheKai Logo"
+                                    width={28}
+                                    height={28}
+                                    className="h-7 w-7"
+                                    priority
+                                />
+                            </div>
                         </div>
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
