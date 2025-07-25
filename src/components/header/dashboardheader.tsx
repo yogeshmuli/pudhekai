@@ -2,10 +2,12 @@
 import React, { useState, useRef } from "react";
 import { useAppDispatch } from "@app/hooks";
 import { logout } from "@app/thunk/auth.thunk";
+import { useRouter } from "next/navigation";
 
 export default function DashboardHeader() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const imgRef = useRef<HTMLImageElement>(null);
 
     // Close dropdown when clicking outside
@@ -31,6 +33,7 @@ export default function DashboardHeader() {
             console.log("Logout clicked");
             setDropdownOpen(false);
             let res = await dispatch(logout()).unwrap();
+            router.push("/landing");
         } catch (error) {
             console.error("Logout Error:", error);
         }

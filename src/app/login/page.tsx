@@ -19,7 +19,7 @@ export default function Login() {
 
     // Validation function
     const validate = (name: keyof LoginFormValues, value: string, values: LoginFormValues): string | null => {
-        debugger
+
         if (name === "email" && !value) return "Email is required";
         if (name === "password" && value.length < 6) return "Password too short";
         return null;
