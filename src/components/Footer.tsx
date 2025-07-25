@@ -16,9 +16,9 @@ const footerSections = [
         key: "support",
         title: "Support",
         links: [
-            { label: "FAQ", url: "#" },
+            { label: "FAQ", url: "/faq" },
             { label: "Help Center", url: "#" },
-            { label: "Privacy Policy", url: "#" },
+            { label: "Privacy Policy", url: "/privacy" },
         ],
     },
     {
