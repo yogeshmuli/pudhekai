@@ -98,6 +98,8 @@ type Question = {
 
 export default function Assessment() {
     const [current, setCurrent] = useState(1);
+    const [hasSubscription, setHasSubscription] = useState(false);
+    const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
     const [questions, setQuestions] = useState<Question[]>([]);
     // answers is now an object: { [questionId]: number | null }
     const [answers, setAnswers] = useState<{ [id: string]: number | null }>({});
@@ -108,8 +110,29 @@ export default function Assessment() {
     console.log("Answers state:", answers);
 
     useEffect(() => {
-        fetchQuestions();
+        checkSubscription();
     }, []);
+
+    const checkSubscription = async () => {
+        try {
+            const response = await fetch('/api/subscription/current');
+            if (response.ok) {
+                setHasSubscription(true);
+                fetchQuestions();
+            } else {
+                // No active subscription, redirect to tier selection
+                window.location.href = '/tier-selection';
+                return;
+            }
+        } catch (error) {
+            console.error('Error checking subscription:', error);
+            // On error, redirect to tier selection
+            window.location.href = '/tier-selection';
+            return;
+        } finally {
+            setIsCheckingSubscription(false);
+        }
+    };
 
     const fetchQuestions = async () => {
         try {
@@ -191,6 +214,17 @@ export default function Assessment() {
     }
 
 
+
+    if (isCheckingSubscription) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Checking subscription...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (questions.length === 0) {
         return <div className="text-center text-gray-500">Loading questions...</div>;

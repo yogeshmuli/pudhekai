@@ -78,15 +78,42 @@ export default function DashboardHeader() {
                         {dropdownOpen && (
                             <div
                                 id="profile-dropdown"
-                                className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50"
+                                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
                             >
+                                <button
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
+                                    onClick={() => {
+                                        router.push('/dashboard');
+                                        setDropdownOpen(false);
+                                    }}
+                                >
+                                    Dashboard
+                                </button>
+                                <button
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
+                                    onClick={() => {
+                                        router.push('/tier-selection');
+                                        setDropdownOpen(false);
+                                    }}
+                                >
+                                    Subscription
+                                </button>
+                                <button
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
+                                    onClick={() => {
+                                        router.push('/assessment');
+                                        setDropdownOpen(false);
+                                    }}
+                                >
+                                    Take Assessment
+                                </button>
+                                <hr className="my-1 border-gray-200" />
                                 <button
                                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
                                     onClick={handleLogout}
                                 >
                                     Logout
                                 </button>
-                                {/* Add more actions here if needed */}
                             </div>
                         )}
                     </div>

@@ -6,8 +6,13 @@ const authSlice = createSlice({
     isAuthenticated: false,
     loading: false,
     error: null as string | null,
+    subscription: null as any,
   },
-  reducers: {},
+  reducers: {
+    setSubscription: (state, action) => {
+      state.subscription = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {
@@ -25,4 +30,5 @@ const authSlice = createSlice({
   },
 });
 
+export const { setSubscription } = authSlice.actions;
 export default authSlice.reducer;

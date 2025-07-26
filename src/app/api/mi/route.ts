@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMIResult, UserResponses } from "../../../services/miScoring";
 import { getUserFromRequest } from "@app/utils/getUserFromRequest";
+import { validateSubscription } from "@app/utils/subscriptionValidation";
 import { db } from "@app/services/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
@@ -34,9 +35,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { responses, assessmentType } = await request.json();
+    const { responses, assessmentType, subscriptionId } = await request.json();
     if (!responses || typeof responses !== "object") {
       return NextResponse.json({ error: "Invalid or missing responses" }, { status: 400 });
+    }
+
+    // Validate subscription
+    const validation = await validateSubscription(uid, subscriptionId);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 403 });
     }
 
     const miScores = await getMIResult(responses as UserResponses);
@@ -46,6 +53,7 @@ export async function POST(request: Request) {
       type: "mi",
       miScores,
       assessmentType: assessmentType || "free",
+      subscriptionId: subscriptionId || null,
       createdAt: serverTimestamp(),
     };
     await addDoc(collection(db, `users/${uid}/assessments`), assessmentData);

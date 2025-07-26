@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 const serviceAccount = require('../../src/keys/serviceAccountKey.json');
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:3000';
 const TEST_EMAIL = `testuser${Date.now()}@example.com`;
 const TEST_PASSWORD = 'Test@1234';
 const TEST_FIRSTNAME = 'Test';
@@ -58,6 +58,14 @@ describe('Full User Flow Integration Test', () => {
           console.log(`  - ${doc.id}: ${JSON.stringify(data.data(), null, 2)}`);
         }
         
+        // Check subscriptions
+        const subscriptions = await adminDb.collection('subscriptions').where('userId', '==', uid).get();
+        console.log(`🔑 Subscriptions Found: ${subscriptions.size}`);
+        for (const doc of subscriptions.docs) {
+          const data = doc.data();
+          console.log(`  - ${doc.id}: ${JSON.stringify(data, null, 2)}`);
+        }
+        
         console.log('\n⚠️  DATA CLEANUP');
         console.log('='.repeat(50));
         
@@ -86,6 +94,13 @@ describe('Full User Flow Integration Test', () => {
           await doc.delete();
           console.log(`  ✅ Deleted recommendation: ${doc.id}`);
         }
+        
+        // Cleanup subscriptions
+        for (const doc of subscriptions.docs) {
+          await doc.ref.delete();
+          console.log(`  ✅ Deleted subscription: ${doc.id}`);
+        }
+        
         await userRef.delete();
         console.log(`  ✅ Deleted user: ${uid}`);
         console.log('✅ Cleanup completed successfully!');
@@ -133,6 +148,28 @@ describe('Full User Flow Integration Test', () => {
     console.log('Using UID as auth token for testing');
   });
 
+  it('should create a free subscription for testing', async () => {
+    const res = await request(BASE_URL)
+      .post('/api/subscription/create')
+      .set('Cookie', `auth_token=${authToken}`)
+      .send({
+        tier: 'free',
+        paymentDetails: null
+      });
+    
+    console.log('Subscription creation status:', res.status);
+    console.log('Subscription creation response:', res.body);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.subscription).toBeDefined();
+    expect(res.body.subscription.tier).toBe('free');
+    expect(res.body.subscription.status).toBe('active');
+    expect(res.body.subscription.subscriptionKey).toBeDefined();
+    
+    console.log('✅ Free subscription created successfully');
+    console.log(`📋 Subscription Key: ${res.body.subscription.subscriptionKey}`);
+  });
+
   it('should complete HEXACO assessment', async () => {
     // Create realistic responses using actual Firebase question IDs (1-5 scale)
     const responses: { [key: string]: number } = {};
@@ -149,7 +186,8 @@ describe('Full User Flow Integration Test', () => {
       .set('Cookie', `auth_token=${authToken}`)
       .send({
         responses,
-        assessmentType: 'free'
+        assessmentType: 'free',
+        subscriptionId: null // Will use active free subscription
       });
     console.log('HEXACO status:', res.status);
     console.log('HEXACO response:', res.body);
@@ -173,7 +211,8 @@ describe('Full User Flow Integration Test', () => {
       .set('Cookie', `auth_token=${authToken}`)
       .send({
         responses,
-        assessmentType: 'free'
+        assessmentType: 'free',
+        subscriptionId: null // Will use active free subscription
       });
     console.log('RIASEC status:', res.status);
     console.log('RIASEC response:', res.body);
@@ -196,7 +235,8 @@ describe('Full User Flow Integration Test', () => {
       .set('Cookie', `auth_token=${authToken}`)
       .send({
         responses,
-        assessmentType: 'free'
+        assessmentType: 'free',
+        subscriptionId: null // Will use active free subscription
       });
     console.log('MI status:', res.status);
     console.log('MI response:', res.body);
@@ -220,7 +260,8 @@ describe('Full User Flow Integration Test', () => {
       .post('/api/family')
       .set('Cookie', `auth_token=${authToken}`)
       .send({
-        responses
+        responses,
+        subscriptionId: null // Will use active free subscription
       });
     console.log('Family status:', res.status);
     console.log('Family response:', res.body);
@@ -242,7 +283,9 @@ describe('Full User Flow Integration Test', () => {
       .post('/api/aptitude')
       .set('Cookie', `auth_token=${authToken}`)
       .send({
-        responses
+        responses,
+        assessmentType: 'free',
+        subscriptionId: null // Will use active free subscription
       });
     console.log('Aptitude status:', res.status);
     console.log('Aptitude response:', res.body);
