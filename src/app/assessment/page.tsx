@@ -1,10 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import ProgressBar from "@app/components/progressBar";
 import { fetchQuizQuestions } from "@app/thunk/quiz.thunk"
 import { submitAssessmentResponse } from "@app/thunk/submitAssessment.thunk";
-import { useAppDispatch } from "@app/hooks";
+import { useAppDispatch, useAppSelector } from "@app/hooks";
 import { toast, Toaster } from "react-hot-toast"; // Add this import
+import { useRouter, useSearchParams } from "next/navigation";
+import DashboardHeader from "@app/components/header/dashboardheader";
 
 
 
@@ -104,12 +106,17 @@ export default function Assessment() {
     // answers is now an object: { [questionId]: number | null }
     const [answers, setAnswers] = useState<{ [id: string]: number | null }>({});
     const dispatch = useAppDispatch();
+    const router = useRouter();
+
     const assesmentType = "free";
-    const testName = "hexaco";
+    const testName = useAppSelector((state) => state.assessment.testName); // Default to "hexaco" if not set
 
     console.log("Answers state:", answers);
 
     useEffect(() => {
+        if (!testName) {
+            router.push("/home");
+        }
         checkSubscription();
     }, []);
 
@@ -121,7 +128,8 @@ export default function Assessment() {
                 fetchQuestions();
             } else {
                 // No active subscription, redirect to tier selection
-                window.location.href = '/tier-selection';
+                // also send the searchParams as its to the 
+                router.push(`/tier-selection/?test=${testName}`)
                 return;
             }
         } catch (error) {
@@ -152,7 +160,7 @@ export default function Assessment() {
                     { label: "Agree", description: "I mostly relate to this.", value: 4 },
                     { label: "Strongly Agree", description: "I completely relate to this.", value: 5 },
                 ],
-            })).slice(0, 4);
+            }));
             setQuestions(mappedQuestions); // Limit to 10 questions for free assessment
 
             // Initialize answers as { [id]: null }
@@ -207,8 +215,10 @@ export default function Assessment() {
             ).unwrap();
 
             toast.success("Assessment submitted successfully!");
+            router.push("/home")
             // handle result (e.g., show recommendations)
         } catch (error: any) {
+            debugger
             toast.error(error?.message || "Failed to submit assessment");
         }
     }
@@ -231,61 +241,63 @@ export default function Assessment() {
     }
 
     return (
-        <div id="quiz-container" className="max-w-4xl mx-auto px-4 py-8">
-            <Toaster position="top-center" />
-            <div id="quiz-header" className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Career Assessment Quiz</h1>
-                <p className="text-gray-600">
-                    Discover your ideal career path through our comprehensive assessment
-                </p>
-            </div>
-            <QuizProgress current={current} total={questions.length} />
-            <QuestionCard
-                question={questions[current - 1]?.question}
-                description={questions[current - 1]?.description}
-                options={questions[current - 1]?.options}
-                selected={answers[questions[current - 1]?.id] ?? null}
-                onSelect={handleSelect}
-            />
-            <div id="quiz-navigation" className="flex justify-between items-center">
-                <button
-                    id="back-btn"
-                    className="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200"
-                    onClick={handleBack}
-                    disabled={current === 1}
-                >
-                    <span className="mr-2">
-                        <svg width={16} height={16} fill="currentColor" viewBox="0 0 448 512">
-                            <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z" />
-                        </svg>
-                    </span>
-                    Back
-                </button>
-                <QuestionIndicator current={current} total={questions.length} />
-                {current !== questions.length && <button
-                    id="next-btn"
-                    className="flex items-center px-6 py-3 text-white bg-primary rounded-lg hover:bg-indigo-700 transition-all duration-200"
-                    onClick={handleNext}
-                >
-                    Next
-                    <span className="ml-2">
-                        <svg width={16} height={16} fill="currentColor" viewBox="0 0 448 512">
-                            <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" />
-                        </svg>
-                    </span>
-                </button>}
-                {/* When all question answered show submit button */}
-                {current === questions.length && (
+        <>
+            <DashboardHeader />
+            <div id="quiz-container" className="max-w-4xl mx-auto px-4 py-8">
+                <Toaster position="top-center" />
+                <div id="quiz-header" className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Career Assessment Quiz</h1>
+                    <p className="text-gray-600">
+                        Discover your ideal career path through our comprehensive assessment
+                    </p>
+                </div>
+                <QuizProgress current={current} total={questions.length} />
+                <QuestionCard
+                    question={questions[current - 1]?.question}
+                    description={questions[current - 1]?.description}
+                    options={questions[current - 1]?.options}
+                    selected={answers[questions[current - 1]?.id] ?? null}
+                    onSelect={handleSelect}
+                />
+                <div id="quiz-navigation" className="flex justify-between items-center">
                     <button
-                        // disabled={Object.values(answers).some(val => val === null)}
-                        id="submit-btn"
-                        className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary-700 transition-all duration-200"
-                        onClick={handleSubmit}
+                        id="back-btn"
+                        className="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                        onClick={handleBack}
+                        disabled={current === 1}
                     >
-                        Submit
+                        <span className="mr-2">
+                            <svg width={16} height={16} fill="currentColor" viewBox="0 0 448 512">
+                                <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z" />
+                            </svg>
+                        </span>
+                        Back
                     </button>
-                )}
-            </div>
-        </div>
+                    <QuestionIndicator current={current} total={questions.length} />
+                    {current !== questions.length && <button
+                        id="next-btn"
+                        className="flex items-center px-6 py-3 text-white bg-primary rounded-lg hover:bg-indigo-700 transition-all duration-200"
+                        onClick={handleNext}
+                    >
+                        Next
+                        <span className="ml-2">
+                            <svg width={16} height={16} fill="currentColor" viewBox="0 0 448 512">
+                                <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" />
+                            </svg>
+                        </span>
+                    </button>}
+                    {/* When all question answered show submit button */}
+                    {current === questions.length && (
+                        <button
+                            // disabled={Object.values(answers).some(val => val === null)}
+                            id="submit-btn"
+                            className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary-700 transition-all duration-200"
+                            onClick={handleSubmit}
+                        >
+                            Submit
+                        </button>
+                    )}
+                </div>
+            </div></>
     );
 }

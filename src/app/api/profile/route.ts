@@ -19,8 +19,13 @@ export async function GET(request: Request) {
     const userData = userDoc.exists() ? userDoc.data() : {};
 
     // 3. Fetch all assessments
-    const assessmentsSnap = await getDocs(collection(db, `users/${uid}/assessments`));
-    const assessments = assessmentsSnap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+    const assessmentsSnap = await getDocs(
+      collection(db, `users/${uid}/assessments`)
+    );
+    const assessments = assessmentsSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as any),
+    }));
 
     // 4. Build assessment history and find last taken date per test type
     const history = [];
@@ -40,13 +45,16 @@ export async function GET(request: Request) {
         history.push({
           type: a.type,
           date: date.toISOString(),
-          tier: a.assessmentType || "Free"
+          tier: a.assessmentType || "Free",
         });
       }
     }
 
     // 5. Calculate eligibility for each test type
-    const eligibility: Record<string, { canTake: boolean; nextAvailable?: string }> = {};
+    const eligibility: Record<
+      string,
+      { canTake: boolean; nextAvailable?: string }
+    > = {};
     const now = new Date();
     for (const testType of TEST_TYPES) {
       if (!lastTaken[testType]) {
@@ -56,8 +64,13 @@ export async function GET(request: Request) {
         if (diff >= SIX_MONTHS_MS) {
           eligibility[testType] = { canTake: true };
         } else {
-          const nextAvailable = new Date(lastTaken[testType]!.getTime() + SIX_MONTHS_MS);
-          eligibility[testType] = { canTake: false, nextAvailable: nextAvailable.toISOString() };
+          const nextAvailable = new Date(
+            lastTaken[testType]!.getTime() + SIX_MONTHS_MS
+          );
+          eligibility[testType] = {
+            canTake: false,
+            nextAvailable: nextAvailable.toISOString(),
+          };
         }
       }
     }
@@ -74,4 +87,4 @@ export async function GET(request: Request) {
   } catch (error) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-} 
+}

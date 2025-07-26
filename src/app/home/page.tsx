@@ -1,20 +1,90 @@
 // placeholder home page component
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import DashboardHeader from "@app/components/header/dashboardheader";
 import ProgressBar from "@app/components/progressBar";
 import AssessmentHub from "./assesment";
 import { SolidButton } from "@app/components/buttons";
+import { fetchProfile } from "@app/thunk/profile.thunk"
+import { useAppDispatch } from "@app/hooks";
+import { useRouter } from "next/navigation";
+
+type UserProfile = {
+    user?: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        dateOfBirth: string;
+        currentGrade: string;
+    };
+    assessments?: {
+        hexaco?: any;
+        riasec?: any;
+        multipleIntelligence?: any;
+        aptitude?: any;
+    };
+    eligibility?: {
+        hexaco: {
+            canTake: boolean;
+        },
+        riasec: {
+            canTake: boolean;
+        },
+        multipleIntelligence: {
+            canTake: boolean;
+        },
+        aptitude: {
+            canTake: boolean;
+        },
+        family: {
+            canTake: boolean;
+        }
+    }
+};
 
 export default function Home() {
+    const [loading, setLoading] = useState(false);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                // Assuming you have a way to get the user's UID
+                setLoading(true);
+                let response = await dispatch(fetchProfile()).unwrap();
+                if (response) {
+                    console.log("Profile fetched successfully:", response);
+                    setProfile(response);
+                }
+                setLoading(false);
+
+            } catch (error) {
+                setLoading(false);
+                console.error("Failed to fetch profile:", error);
+                router.push("/login");
+            }
+        };
+
+        fetchUserProfile();
+    }, []);
+
     const progressPercent = 50; // Change this value to update progress
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <p>Loading...</p>
+            </div>
+        );
+    }
 
     return (
         <div>
             <DashboardHeader />
             <main id="main-content" className="p-8">
                 <section id="welcome-section" className="mb-8">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome, Sarah!</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome, {profile?.user?.firstName}</h2>
                     <p className="text-gray-600 text-lg font-bold">Ready to discover your perfect career path?</p>
                 </section>
                 {/* Progress */}
@@ -37,7 +107,7 @@ export default function Home() {
                     </div>
                 </section>
                 {/* Assesment Hub */}
-                <AssessmentHub />
+                <AssessmentHub elligibility={profile?.eligibility} assesement={profile?.assessments} />
                 {/* faq */}
                 <section id="help-section" className="mb-8">
                     <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200">
