@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     }
     // Generate report
     const report = generateCareerReport({ user, assessments, recommendations });
-    return NextResponse.json(report);
+  return NextResponse.json(report);
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

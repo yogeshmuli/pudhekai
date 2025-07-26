@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUserFromRequest } from '@app/utils/getUserFromRequest';
 import { db } from '@app/services/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 /**
  * @openapi
@@ -53,8 +53,8 @@ export async function POST(request: Request) {
       paymentDetails: paymentDetails || null,
       createdAt: serverTimestamp(),
       expiresAt: tier === 'free' 
-        ? new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000) // 6 months
-        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        ? Timestamp.fromDate(new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000)) // 6 months
+        : Timestamp.fromDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)), // 1 year
       subscriptionKey: tier === 'free' 
         ? `FREE_${uid}_${Date.now()}` 
         : null, // Will be generated after payment approval

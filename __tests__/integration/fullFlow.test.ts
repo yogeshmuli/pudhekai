@@ -12,6 +12,7 @@ const TEST_LASTNAME = 'User';
 
 let uid = '';
 let authToken = '';
+let subscriptionId = '';
 
 // Initialize Firebase Admin for cleanup
 if (!getApps().length) {
@@ -166,7 +167,11 @@ describe('Full User Flow Integration Test', () => {
     expect(res.body.subscription.status).toBe('active');
     expect(res.body.subscription.subscriptionKey).toBeDefined();
     
+    // Store the subscription ID for use in assessment calls
+    subscriptionId = res.body.subscription.id;
+    
     console.log('✅ Free subscription created successfully');
+    console.log(`📋 Subscription ID: ${subscriptionId}`);
     console.log(`📋 Subscription Key: ${res.body.subscription.subscriptionKey}`);
   });
 
@@ -187,7 +192,7 @@ describe('Full User Flow Integration Test', () => {
       .send({
         responses,
         assessmentType: 'free',
-        subscriptionId: null // Will use active free subscription
+        subscriptionId: subscriptionId // Use the created subscription ID
       });
     console.log('HEXACO status:', res.status);
     console.log('HEXACO response:', res.body);
@@ -212,7 +217,7 @@ describe('Full User Flow Integration Test', () => {
       .send({
         responses,
         assessmentType: 'free',
-        subscriptionId: null // Will use active free subscription
+        subscriptionId: subscriptionId // Use the created subscription ID
       });
     console.log('RIASEC status:', res.status);
     console.log('RIASEC response:', res.body);
@@ -236,7 +241,7 @@ describe('Full User Flow Integration Test', () => {
       .send({
         responses,
         assessmentType: 'free',
-        subscriptionId: null // Will use active free subscription
+        subscriptionId: subscriptionId // Use the created subscription ID
       });
     console.log('MI status:', res.status);
     console.log('MI response:', res.body);
@@ -261,7 +266,7 @@ describe('Full User Flow Integration Test', () => {
       .set('Cookie', `auth_token=${authToken}`)
       .send({
         responses,
-        subscriptionId: null // Will use active free subscription
+        subscriptionId: subscriptionId // Use the created subscription ID
       });
     console.log('Family status:', res.status);
     console.log('Family response:', res.body);
@@ -285,7 +290,7 @@ describe('Full User Flow Integration Test', () => {
       .send({
         responses,
         assessmentType: 'free',
-        subscriptionId: null // Will use active free subscription
+        subscriptionId: subscriptionId // Use the created subscription ID
       });
     console.log('Aptitude status:', res.status);
     console.log('Aptitude response:', res.body);
