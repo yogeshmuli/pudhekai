@@ -42,7 +42,10 @@ export default function DashboardHeader() {
     };
 
     return (
-        <header id="header" className="bg-primary px-8 py-6">
+        <header
+            id="header"
+            className="bg-primary px-8 py-6 sticky top-0 z-40"
+        >
             <div className="flex items-center justify-between">
                 {/* Left: Logo & Title */}
                 <div className="flex items-center space-x-4">
