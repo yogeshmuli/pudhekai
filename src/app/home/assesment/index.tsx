@@ -7,6 +7,21 @@ import { setTestName } from "@app/slice/assesement.slice"
 
 const assessmentData = [
     {
+        id: "family",
+        iconBg: "bg-orange-100",
+        icon: (
+            <svg className="text-orange-600 text-xl" width={24} height={24} aria-hidden="true" viewBox="0 0 576 512">
+                <path fill="currentColor" d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" />
+            </svg>
+        ),
+        status: { label: "Available", class: "bg-warning text-white" },
+        title: "Family Context",
+        description: "Share your family background and support system.",
+        progress: 0,
+        progressColor: "bg-orange-500",
+        button: { label: "Start Test", class: "bg-primary text-white hover:bg-primary/90", disabled: false },
+    },
+    {
         id: "hexaco",
         iconBg: "bg-green-100",
         icon: (
@@ -25,13 +40,13 @@ const assessmentData = [
         id: "riasec",
         iconBg: "bg-blue-100",
         icon: (
-            <svg className="text-blue-600 text-xl" width={24} height={24} aria-hidden="true" viewBox="0 0 512 512">
-                <path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z" />
+            <svg className="text-blue-600 text-xl" width={24} height={24} aria-hidden="true" viewBox="0 0 640 512">
+                <path fill="currentColor" d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z" />
             </svg>
         ),
-        status: { label: "Available", class: "bg-primary text-white" },
+        status: { label: "Available", class: "bg-info text-white" },
         title: "RIASEC Interest Test",
-        description: "Explore your interests and passion areas.",
+        description: "Explore your career interests and preferences.",
         progress: 0,
         progressColor: "bg-blue-600",
         button: { label: "Start Test", class: "bg-primary text-white hover:bg-primary/90", disabled: false },
@@ -40,30 +55,15 @@ const assessmentData = [
         id: "mi",
         iconBg: "bg-purple-100",
         icon: (
-            <svg className="text-purple-600 text-xl" width={24} height={24} aria-hidden="true" viewBox="0 0 512 512">
-                <path fill="currentColor" d="M184 0c30.9 0 56 25.1 56 56V456c0 30.9-25.1 56-56 56c-28.9 0-52.7-21.9-55.7-50.1c-5.2 1.4-10.7 2.1-16.3 2.1c-35.3 0-64-28.7-64-64c0-7.4 1.3-14.6 3.6-21.2C21.4 367.4 0 338.2 0 304c0-31.9 18.7-59.5 45.8-72.3C37.1 220.8 32 207 32 192c0-30.7 21.6-56.3 50.4-62.6C80.8 123.9 80 118 80 112c0-29.9 20.6-55.1 48.3-62.1C131.3 21.9 155.1 0 184 0zM328 0c28.9 0 52.6 21.9 55.7 49.9c27.8 7 48.3 32.1 48.3 62.1c0 6-.8 11.9-2.4 17.4c28.8 6.2 50.4 31.9 50.4 62.6c0 15-5.1 28.8-13.8 39.7C493.3 244.5 512 272.1 512 304c0 34.2-21.4 63.4-51.6 74.8c2.3 6.6 3.6 13.8 3.6 21.2c0 35.3-28.7 64-64 64c-5.6 0-11.1-.7-16.3-2.1c-3 28.2-26.8 50.1-55.7 50.1c-30.9 0-56-25.1-56-56V56c0-30.9 25.1-56 56-56z" />
+            <svg className="text-purple-600 text-xl" width={24} height={24} aria-hidden="true" viewBox="0 0 640 512">
+                <path fill="currentColor" d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z" />
             </svg>
         ),
         status: { label: "Available", class: "bg-purple-600 text-white" },
         title: "Multiple Intelligence Test",
-        description: "Assess your multiple intelligences and learning styles.",
+        description: "Discover your learning style and intelligence types.",
         progress: 0,
         progressColor: "bg-purple-600",
-        button: { label: "Start Test", class: "bg-primary text-white hover:bg-primary/90", disabled: false },
-    },
-    {
-        id: "family",
-        iconBg: "bg-orange-100",
-        icon: (
-            <svg className="text-orange-600 text-xl" width={24} height={24} aria-hidden="true" viewBox="0 0 576 512">
-                <path fill="currentColor" d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" />
-            </svg>
-        ),
-        status: { label: "Available", class: "bg-warning text-white" },
-        title: "Family Context",
-        description: "Share your family background and support system.",
-        progress: 0,
-        progressColor: "bg-orange-500",
         button: { label: "Start Test", class: "bg-primary text-white hover:bg-primary/90", disabled: false },
     },
     {
@@ -74,7 +74,7 @@ const assessmentData = [
                 <path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 96c44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80 35.8-80 80-80zm0 352c-52.9 0-99.9-25.8-128.7-65.7 1.1-40.7 83.6-62.9 128.7-62.9s127.6 22.2 128.7 62.9C355.9 430.2 308.9 456 256 456z" />
             </svg>
         ),
-        status: { label: "Available", class: "bg-pink-600 text-white" },
+        status: { label: "Premium Only", class: "bg-pink-600 text-white" },
         title: "Aptitude Test",
         description: "Test your logical reasoning and problem-solving skills.",
         progress: 0,
@@ -143,20 +143,32 @@ function AssessmentCard({
     );
 }
 
-export default function AssessmentHub({ elligibility, assesement }: any) {
+export default function AssessmentHub({ elligibility, assesement, subscription }: any) {
     let mappedData = assessmentData.map((card) => {
-        console.log(assesement?.find((a: any) => a.type === card.id))
+        const isCompleted = assesement?.find((a: any) => a.type === card.id);
+        const canTake = elligibility?.[card.id]?.canTake;
+        
+        // Check if aptitude test is available based on subscription
+        const isAptitudeAvailable = card.id === "aptitude" ? 
+            (subscription?.tier === "paid") : true;
+        
         return {
             ...card,
             status: {
-                label: elligibility?.[card.id]?.canTake ? "Available" : "Not Available",
-                class: elligibility?.[card.id]?.canTake ? "bg-success text-white" : "bg-gray-300 text-gray-700",
+                label: isCompleted ? "Completed" : 
+                       !canTake ? "Not Available" :
+                       !isAptitudeAvailable ? "Premium Only" : "Available",
+                class: isCompleted ? "bg-success text-white" : 
+                       !canTake ? "bg-gray-300 text-gray-700" :
+                       !isAptitudeAvailable ? "bg-pink-600 text-white" : "bg-success text-white",
             },
-            opacity: elligibility?.[card.id]?.canTake ? "" : "opacity-50 cursor-not-allowed",
+            opacity: (!canTake || !isAptitudeAvailable) ? "opacity-50 cursor-not-allowed" : "",
             button: {
                 ...card.button,
-                label: assesement?.find((a: any) => a.type === card.id) ? "Complete" : card.button.label,
-                disabled: !elligibility?.[card.id]?.canTake,
+                label: isCompleted ? "Completed" : 
+                       !canTake ? "Not Available" :
+                       !isAptitudeAvailable ? "Upgrade Required" : card.button.label,
+                disabled: !canTake || !isAptitudeAvailable,
             },
         }
     })

@@ -32,18 +32,67 @@ interface AptitudeScore {
   percent: number;
   label: string;
 }
+
+interface AptitudeInterpretation {
+  overallSummary: string;
+  aptitudeProfile: string;
+  keyStrengths: string[];
+  areasForGrowth: string[];
+  careerImplications: string[];
+  suggestedCareers: string[];
+  learningStrategies: string[];
+}
+
 interface RiasecScore {
   area: string;
   score: number;
 }
+
+interface RiasecInterpretation {
+  overallSummary: string;
+  interestProfile: string;
+  keyStrengths: string[];
+  areasForGrowth: string[];
+  careerImplications: string[];
+  suggestedCareers: string[];
+  workStyle: string;
+  learningApproach: string;
+}
+
 interface HexacoScore {
   trait: string;
   score: number;
 }
+
+interface HexacoInterpretation {
+  overallSummary: string;
+  personalityProfile: string;
+  keyStrengths: string[];
+  areasForGrowth: string[];
+  careerImplications: string[];
+  leadershipStyle: string;
+  workStyle: string;
+  communicationStyle: string;
+  teamDynamics: string;
+  stressManagement: string;
+  learningApproach: string;
+}
+
 interface MIScore {
   intelligence: string;
   score: number;
 }
+
+interface MIInterpretation {
+  overallSummary: string;
+  intelligenceProfile: string;
+  keyStrengths: string[];
+  areasForGrowth: string[];
+  careerImplications: string[];
+  suggestedCareers: string[];
+  learningStrategies: string[];
+}
+
 interface CareerRecommendation {
   title: string;
   tag: string;
@@ -53,13 +102,18 @@ interface CareerRecommendation {
   careerPath: string;
   growthTip: string;
 }
+
 interface ReportData {
   studentDetails: StudentDetails;
   familyBackground: FamilyBackground;
   aptitudeScores: AptitudeScore[];
+  aptitudeInterpretation?: AptitudeInterpretation; // Single aptitude interpretation
   riasecScores: RiasecScore[];
+  riasecInterpretation?: RiasecInterpretation; // Single RIASEC interpretation
   hexacoScores: HexacoScore[];
+  hexacoInterpretation?: HexacoInterpretation; // Single HEXACO interpretation
   miScores: MIScore[];
+  miInterpretation?: MIInterpretation; // Single MI interpretation
   recommendations: CareerRecommendation[];
 }
 
@@ -82,18 +136,18 @@ const ReportContent = () => {
       return;
     }
     
-    const assessmentId = searchParams.get('assessment');
-    if (!assessmentId) {
-      setError('No assessment ID provided');
+    const subscriptionId = searchParams.get('subscription');
+    if (!subscriptionId) {
+      setError('No subscription ID provided');
       setIsLoading(false);
       return;
     }
-    fetchReportData(assessmentId);
+    fetchReportData(subscriptionId);
   }, [isAuthenticated, authLoading, router, searchParams]);
 
-  const fetchReportData = async (assessmentId: string) => {
+  const fetchReportData = async (subscriptionId: string) => {
     try {
-      const response = await fetch(`/api/report?assessment=${assessmentId}`);
+      const response = await fetch(`/api/report?subscription=${subscriptionId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch report data');
       }
@@ -109,19 +163,24 @@ const ReportContent = () => {
 
   const handleDownloadPDF = async () => {
     try {
+      const subscriptionId = searchParams.get('subscription');
+      if (!subscriptionId) {
+        throw new Error('No subscription ID available');
+      }
+      
       const response = await fetch('/api/report/download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ reportData }),
+        body: JSON.stringify({ subscriptionId }),
       });
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `pudhekai-report-${reportData?.studentDetails.reportId}.pdf`;
+        a.download = `pudhekai-report-${subscriptionId}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -307,13 +366,84 @@ const ReportContent = () => {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-gray-800">
-                <span className="font-semibold">Overall Score:</span> 12/40 (30%)
-                <br />
-                <span className="font-semibold">Summary:</span> Moderate logical reasoning, but needs improvement in numerical and pattern recognition.
-              </p>
-            </div>
+            
+            {/* AI-Generated Aptitude Interpretations */}
+            {reportData.aptitudeInterpretation && (
+              <div className="mt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-primary">AI-Generated Aptitude Insights</h3>
+                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                  <h4 className="font-semibold text-blue-800 mb-2">Overall Summary</h4>
+                  <p className="text-gray-700 mb-3">{reportData.aptitudeInterpretation.overallSummary}</p>
+                  
+                  <h4 className="font-semibold text-blue-800 mb-2">Aptitude Profile</h4>
+                  <p className="text-gray-700 mb-3">{reportData.aptitudeInterpretation.aptitudeProfile}</p>
+                  
+                  {reportData.aptitudeInterpretation.keyStrengths && reportData.aptitudeInterpretation.keyStrengths.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-green-700">Key Strengths:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.aptitudeInterpretation.keyStrengths.map((strength, idx) => (
+                          <li key={idx}>{strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.aptitudeInterpretation.areasForGrowth && reportData.aptitudeInterpretation.areasForGrowth.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-orange-700">Areas for Growth:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.aptitudeInterpretation.areasForGrowth.map((area, idx) => (
+                          <li key={idx}>{area}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.aptitudeInterpretation.careerImplications && reportData.aptitudeInterpretation.careerImplications.length > 0 && (
+                    <div>
+                      <span className="font-semibold text-purple-700">Career Implications:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.aptitudeInterpretation.careerImplications.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.aptitudeInterpretation.learningStrategies && reportData.aptitudeInterpretation.learningStrategies.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-purple-700">Learning Strategies:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.aptitudeInterpretation.learningStrategies.map((strategy, idx) => (
+                          <li key={idx}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.aptitudeInterpretation.suggestedCareers && reportData.aptitudeInterpretation.suggestedCareers.length > 0 && (
+                    <div>
+                      <span className="font-semibold text-teal-700">Suggested Careers:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.aptitudeInterpretation.suggestedCareers.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback interpretation if no AI interpretations available */}
+            {(!reportData.aptitudeInterpretation) && (
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <p className="text-gray-800">
+                  <span className="font-semibold">Interpretation:</span> Strong logical reasoning and problem-solving skills, moderate spatial visualization.
+                </p>
+              </div>
+            )}
           </section>
           {/* 4. RIASEC */}
           <section className="mb-8">
@@ -338,13 +468,89 @@ const ReportContent = () => {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 p-4 bg-purple-50 rounded-lg">
-              <p className="text-gray-800">
-                <span className="font-semibold">Interpretation:</span> Strong interest in Artistic and Conventional activities, moderate Enterprising orientation.
-              </p>
-            </div>
+            
+            {/* AI-Generated RIASEC Interpretations */}
+            {reportData.riasecInterpretation && (
+              <div className="mt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-primary">AI-Generated RIASEC Insights</h3>
+                <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
+                  <h4 className="font-semibold text-purple-800 mb-2">Overall Summary</h4>
+                  <p className="text-gray-700 mb-3">{reportData.riasecInterpretation.overallSummary}</p>
+                  
+                  <h4 className="font-semibold text-purple-800 mb-2">Interest Profile</h4>
+                  <p className="text-gray-700 mb-3">{reportData.riasecInterpretation.interestProfile}</p>
+                  
+                  {reportData.riasecInterpretation.keyStrengths && reportData.riasecInterpretation.keyStrengths.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-green-700">Key Strengths:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.riasecInterpretation.keyStrengths.map((strength, idx) => (
+                          <li key={idx}>{strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.riasecInterpretation.areasForGrowth && reportData.riasecInterpretation.areasForGrowth.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-orange-700">Areas for Growth:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.riasecInterpretation.areasForGrowth.map((area, idx) => (
+                          <li key={idx}>{area}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.riasecInterpretation.careerImplications && reportData.riasecInterpretation.careerImplications.length > 0 && (
+                    <div>
+                      <span className="font-semibold text-purple-700">Career Implications:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.riasecInterpretation.careerImplications.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.riasecInterpretation.suggestedCareers && reportData.riasecInterpretation.suggestedCareers.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-blue-700">Suggested Careers:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.riasecInterpretation.suggestedCareers.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.riasecInterpretation.workStyle && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-green-700">Work Style:</span>
+                      <p className="text-gray-700">{reportData.riasecInterpretation.workStyle}</p>
+                    </div>
+                  )}
+                  
+                  {reportData.riasecInterpretation.learningApproach && (
+                    <div>
+                      <span className="font-semibold text-purple-700">Learning Approach:</span>
+                      <p className="text-gray-700">{reportData.riasecInterpretation.learningApproach}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback interpretation if no AI interpretations available */}
+            {(!reportData.riasecInterpretation) && (
+              <div className="mt-4 p-4 bg-purple-50 rounded-lg">
+                <p className="text-gray-800">
+                  <span className="font-semibold">Interpretation:</span> Strong interest in Artistic and Conventional activities, moderate Enterprising orientation.
+                </p>
+              </div>
+            )}
           </section>
-          {/* 5. HEXACO */}
+          {/* 5. HEXACO (Personality Profile) */}
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-primary border-b-2 border-primary/30 pb-2 mb-4">
               5. HEXACO (Personality Profile)
@@ -367,11 +573,104 @@ const ReportContent = () => {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
-              <p className="text-gray-800">
-                <span className="font-semibold">Interpretation:</span> High agreeableness, moderate emotionality, relatively lower conscientiousness.
-              </p>
-            </div>
+            
+            {/* AI-Generated HEXACO Interpretations */}
+            {reportData.hexacoInterpretation && (
+              <div className="mt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-primary">AI-Generated Personality Insights</h3>
+                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                  <h4 className="font-semibold text-blue-800 mb-2">Overall Summary</h4>
+                  <p className="text-gray-700 mb-3">{reportData.hexacoInterpretation.overallSummary}</p>
+                  
+                  <h4 className="font-semibold text-blue-800 mb-2">Personality Profile</h4>
+                  <p className="text-gray-700 mb-3">{reportData.hexacoInterpretation.personalityProfile}</p>
+                  
+                  {reportData.hexacoInterpretation.keyStrengths && reportData.hexacoInterpretation.keyStrengths.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-green-700">Key Strengths:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.hexacoInterpretation.keyStrengths.map((strength, idx) => (
+                          <li key={idx}>{strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.areasForGrowth && reportData.hexacoInterpretation.areasForGrowth.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-orange-700">Areas for Growth:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.hexacoInterpretation.areasForGrowth.map((area, idx) => (
+                          <li key={idx}>{area}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.careerImplications && reportData.hexacoInterpretation.careerImplications.length > 0 && (
+                    <div>
+                      <span className="font-semibold text-purple-700">Career Implications:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.hexacoInterpretation.careerImplications.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.leadershipStyle && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-blue-700">Leadership Style:</span>
+                      <p className="text-gray-700">{reportData.hexacoInterpretation.leadershipStyle}</p>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.workStyle && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-green-700">Work Style:</span>
+                      <p className="text-gray-700">{reportData.hexacoInterpretation.workStyle}</p>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.communicationStyle && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-yellow-700">Communication Style:</span>
+                      <p className="text-gray-700">{reportData.hexacoInterpretation.communicationStyle}</p>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.teamDynamics && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-indigo-700">Team Dynamics:</span>
+                      <p className="text-gray-700">{reportData.hexacoInterpretation.teamDynamics}</p>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.stressManagement && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-red-700">Stress Management:</span>
+                      <p className="text-gray-700">{reportData.hexacoInterpretation.stressManagement}</p>
+                    </div>
+                  )}
+                  
+                  {reportData.hexacoInterpretation.learningApproach && (
+                    <div>
+                      <span className="font-semibold text-pink-700">Learning Approach:</span>
+                      <p className="text-gray-700">{reportData.hexacoInterpretation.learningApproach}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback interpretation if no AI interpretations available */}
+            {(!reportData.hexacoInterpretation) && (
+              <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                <p className="text-gray-800">
+                  <span className="font-semibold">Interpretation:</span> High agreeableness, moderate emotionality, relatively lower conscientiousness.
+                </p>
+              </div>
+            )}
           </section>
           {/* 6. Multiple Intelligences */}
           <section className="mb-8">
@@ -396,11 +695,84 @@ const ReportContent = () => {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 p-4 bg-orange-50 rounded-lg">
-              <p className="text-gray-800">
-                <span className="font-semibold">Highlights:</span> Exceptional Intrapersonal and Spatial Intelligence, strong Bodily-Kinesthetic; lower Logical-Mathematical and Musical.
-              </p>
-            </div>
+            
+            {/* AI-Generated MI Interpretations */}
+            {reportData.miInterpretation && (
+              <div className="mt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-primary">AI-Generated MI Insights</h3>
+                <div className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
+                  <h4 className="font-semibold text-orange-800 mb-2">Overall Summary</h4>
+                  <p className="text-gray-700 mb-3">{reportData.miInterpretation.overallSummary}</p>
+                  
+                  <h4 className="font-semibold text-orange-800 mb-2">Intelligence Profile</h4>
+                  <p className="text-gray-700 mb-3">{reportData.miInterpretation.intelligenceProfile}</p>
+                  
+                  {reportData.miInterpretation.keyStrengths && reportData.miInterpretation.keyStrengths.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-green-700">Key Strengths:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.miInterpretation.keyStrengths.map((strength, idx) => (
+                          <li key={idx}>{strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.miInterpretation.areasForGrowth && reportData.miInterpretation.areasForGrowth.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-orange-700">Areas for Growth:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.miInterpretation.areasForGrowth.map((area, idx) => (
+                          <li key={idx}>{area}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.miInterpretation.careerImplications && reportData.miInterpretation.careerImplications.length > 0 && (
+                    <div>
+                      <span className="font-semibold text-purple-700">Career Implications:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.miInterpretation.careerImplications.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.miInterpretation.suggestedCareers && reportData.miInterpretation.suggestedCareers.length > 0 && (
+                    <div className="mb-3">
+                      <span className="font-semibold text-blue-700">Suggested Careers:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.miInterpretation.suggestedCareers.map((career, idx) => (
+                          <li key={idx}>{career}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {reportData.miInterpretation.learningStrategies && reportData.miInterpretation.learningStrategies.length > 0 && (
+                    <div>
+                      <span className="font-semibold text-purple-700">Learning Strategies:</span>
+                      <ul className="list-disc list-inside ml-2 text-gray-700">
+                        {reportData.miInterpretation.learningStrategies.map((strategy, idx) => (
+                          <li key={idx}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback interpretation if no AI interpretations available */}
+            {(!reportData.miInterpretation) && (
+              <div className="mt-4 p-4 bg-orange-50 rounded-lg">
+                <p className="text-gray-800">
+                  <span className="font-semibold">Interpretation:</span> High Logical-Mathematical and Interpersonal Intelligence, moderate Spatial Intelligence.
+                </p>
+              </div>
+            )}
           </section>
           {/* 7. AI-Powered Career Recommendations */}
           <section className="mb-8">

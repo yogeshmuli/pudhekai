@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid or missing responses" }, { status: 400 });
     }
 
-    // Validate subscription
+    // Validate subscription (subscriptionId can be null for free tier)
     const validation = await validateSubscription(uid, subscriptionId);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 403 });
@@ -52,13 +52,14 @@ export async function POST(request: Request) {
     const assessmentData = {
       type: "family",
       summary,
-      subscriptionId: subscriptionId || null,
+      subscriptionId: subscriptionId || validation.subscription?.id || null,
       createdAt: serverTimestamp(),
     };
     await addDoc(collection(db, `users/${uid}/assessments`), assessmentData);
 
     return NextResponse.json({ summary });
   } catch (error) {
+    console.error('Error in family assessment submission:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 } 

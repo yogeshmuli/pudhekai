@@ -42,7 +42,7 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 function loadJson(filename: string): any[] {
-  const jsonPath = path.join(process.cwd(), "src/services/" + filename);
+  const jsonPath = path.join(process.cwd(), "src/data/" + filename);
   return JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 }
 
@@ -74,6 +74,9 @@ export async function GET(request: Request) {
     const test = searchParams.get('test');
     const assessmentType = searchParams.get('assessmentType');
     const type = (assessmentType === "paid") ? "paid" : "free";
+    
+    console.log('Quiz API called with:', { test, assessmentType, type });
+    
     let questions = [];
 
     switch (test) {
@@ -101,14 +104,23 @@ export async function GET(request: Request) {
         questions = await fetchQuestionsFromFirestore("questions_reasoning");
         break;
       }
-      // For family, you may need a similar Firestore fetch if migrated
+      case "family": {
+        // Load family questions from JSON file
+        console.log('Loading family questions from JSON file');
+        questions = loadJson("familiy_questions.json");
+        console.log('Loaded family questions:', questions);
+        break;
+      }
       default:
+        console.error('Invalid test type:', test);
         return NextResponse.json({ error: "Invalid test type" }, { status: 400 });
     }
 
+    console.log('Returning questions:', questions.length);
     // Optionally shuffle questions here if needed
     return NextResponse.json({ questions });
   } catch (error) {
+    console.error('Error fetching quiz questions:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 } 

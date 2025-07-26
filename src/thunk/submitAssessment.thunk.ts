@@ -4,6 +4,7 @@ interface SubmitAssessmentPayload {
   responses: { [id: string]: number | null };
   assessmentType: string;
   testName: string;
+  subscriptionId?: string;
 }
 
 export const submitAssessmentResponse = createAsyncThunk(
@@ -73,6 +74,7 @@ export const submitAssessmentResponse = createAsyncThunk(
             body: JSON.stringify({
               responses: payload.responses,
               assessmentType: payload.assessmentType,
+              subscriptionId: payload.subscriptionId,
             }),
           });
           if (!familyResponse.ok) {

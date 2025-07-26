@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '../../store/hooks';
+import DashboardHeader from '../../components/header/dashboardheader';
 
 interface Assessment {
   id: string;
@@ -20,23 +21,28 @@ interface Subscription {
   expiresAt: any;
 }
 
-export default function DashboardPage() {
+export default function ProfilePage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { isAuthenticated } = useAppSelector(state => state.auth);
+  const { isAuthenticated, loading: authLoading } = useAppSelector(state => state.auth);
 
   useEffect(() => {
+    // Wait for auth initialization to complete
+    if (authLoading) {
+      return;
+    }
+    
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
 
-    fetchDashboardData();
-  }, [isAuthenticated, router]);
+    fetchProfileData();
+  }, [isAuthenticated, authLoading, router]);
 
-  const fetchDashboardData = async () => {
+  const fetchProfileData = async () => {
     try {
       const [subscriptionRes, assessmentsRes] = await Promise.all([
         fetch('/api/subscription/current'),
@@ -53,7 +59,7 @@ export default function DashboardPage() {
         setAssessments(profileData.assessments || []);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching profile data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -78,12 +84,12 @@ export default function DashboardPage() {
     return date.toLocaleDateString('en-IN');
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600">{authLoading ? 'Checking authentication...' : 'Loading profile...'}</p>
         </div>
       </div>
     );
@@ -91,10 +97,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <DashboardHeader />
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Manage your subscriptions and view assessment history</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile & Settings</h1>
+          <p className="text-gray-600">Manage your account, subscription, and assessment history</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -166,17 +173,20 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Assessment History</h2>
                 <button
-                  onClick={() => router.push('/assessment')}
+                  onClick={() => router.push('/home')}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
                 >
-                  Take New Assessment
+                  Back to Dashboard
                 </button>
               </div>
               
               {assessments.length > 0 ? (
                 <div className="space-y-4">
-                  {assessments.map((assessment) => (
-                    <div key={assessment.id} className="border border-gray-200 rounded-lg p-4">
+                  {assessments.map((assessment, index) => (
+                    <div 
+                      key={`${assessment.type}-${assessment.id || index}-${assessment.createdAt?.toDate?.() || assessment.createdAt || Date.now()}`} 
+                      className="border border-gray-200 rounded-lg p-4"
+                    >
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-medium text-gray-900 capitalize">
@@ -186,12 +196,9 @@ export default function DashboardPage() {
                             {formatDate(assessment.createdAt)} • {assessment.assessmentType} tier
                           </p>
                         </div>
-                        <button
-                          onClick={() => router.push(`/report?assessment=${assessment.id}`)}
-                          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                        >
-                          View Report
-                        </button>
+                        <span className="text-sm text-gray-400">
+                          Completed
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -200,7 +207,7 @@ export default function DashboardPage() {
                 <div className="text-center py-8">
                   <p className="text-gray-500 mb-4">No assessments completed yet</p>
                   <button
-                    onClick={() => router.push('/assessment')}
+                    onClick={() => router.push('/home')}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
                   >
                     Start Your First Assessment
@@ -211,32 +218,37 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Account Settings */}
         <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Account Settings</h2>
+          <div className="grid md:grid-cols-2 gap-4">
             <button
-              onClick={() => router.push('/assessment')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              onClick={() => router.push('/profile/edit')}
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
             >
-              <h3 className="font-medium text-gray-900 mb-1">Take Assessment</h3>
-              <p className="text-sm text-gray-500">Start a new career assessment</p>
+              <h3 className="font-medium text-gray-900 mb-1">Edit Profile</h3>
+              <p className="text-sm text-gray-500">Update your personal information</p>
             </button>
-            
+            <button
+              onClick={() => router.push('/profile/password')}
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+            >
+              <h3 className="font-medium text-gray-900 mb-1">Change Password</h3>
+              <p className="text-sm text-gray-500">Update your account password</p>
+            </button>
             <button
               onClick={() => router.push('/tier-selection')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
             >
               <h3 className="font-medium text-gray-900 mb-1">Upgrade Plan</h3>
               <p className="text-sm text-gray-500">Switch to premium tier</p>
             </button>
-            
             <button
-              onClick={() => router.push('/profile')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              onClick={() => router.push('/profile/privacy')}
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
             >
-              <h3 className="font-medium text-gray-900 mb-1">View Profile</h3>
-              <p className="text-sm text-gray-500">Manage your account</p>
+              <h3 className="font-medium text-gray-900 mb-1">Privacy Settings</h3>
+              <p className="text-sm text-gray-500">Manage your data and privacy</p>
             </button>
           </div>
         </div>

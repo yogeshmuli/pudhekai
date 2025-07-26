@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { db } from "./firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { generateRiasecInterpretations, RiasecCategoryScore } from "./riasecInterpretation";
 
 // Question Type
 export type RiasecQuestion = {
@@ -17,7 +18,14 @@ export type RiasecQuestion = {
 };
 
 // User Responses
-export type UserResponses = { [id: string]: number };
+export type UserResponses = { [questionId: string]: number };
+export type AssessmentType = "free" | "paid";
+
+export interface RiasecResult {
+  categoryScores: { [type: string]: number };
+  questionsUsed: string[];
+  interpretation?: any; // Single interpretation object
+}
 
 // Helper to fetch questions from Firestore
 async function fetchRiasecQuestions(): Promise<RiasecQuestion[]> {
@@ -67,13 +75,39 @@ function scoreRiasec(
   return scores;
 }
 
+// Convert category scores to format needed for interpretation
+function convertToCategoryScores(categoryScores: { [category: string]: number }): RiasecCategoryScore[] {
+  const maxScore = 5; // RIASEC uses 1-5 scale
+  return Object.entries(categoryScores).map(([category, score]) => ({
+    category,
+    score: Math.round(score * 10) / 10, // Round to 1 decimal
+    maxScore,
+    percentage: Math.round((score / maxScore) * 100)
+  }));
+}
+
 // Example main usage
 export async function getRiasecResult(
-  userResponses: UserResponses,
-  assessmentType: "free" | "paid" = "free"
-) {
+  userResponses: UserResponses, 
+  assessmentType: AssessmentType = "free",
+  userContext?: { age?: number; gender?: string; currentGrade?: string; }
+): Promise<RiasecResult> {
   const allQuestions = await fetchRiasecQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const categoryScores = scoreRiasec(selectedQuestions, userResponses);
-  return { categoryScores, questionsUsed: selectedQuestions.map((q) => q.id) };
+  
+  // Convert scores for interpretation
+  const categoryScoresForInterpretation: RiasecCategoryScore[] = Object.entries(categoryScores).map(([category, score]) => ({
+    category,
+    score
+  }));
+  
+  // Generate single comprehensive interpretation
+  const interpretation = await generateRiasecInterpretations(categoryScoresForInterpretation, userContext);
+  
+  return { 
+    categoryScores, 
+    questionsUsed: selectedQuestions.map((q) => q.id), 
+    interpretation 
+  };
 }

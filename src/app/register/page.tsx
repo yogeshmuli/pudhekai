@@ -66,17 +66,12 @@ export default function Register() {
             let res = await dispatch(register(requestObject)).unwrap();
             if (res.success) {
                 // Handle successful registration
-                toast.success("Registration successful!");
-                router.push("/login"); // Redirect to login or dashboard
+                toast.success("Registration successful! Please login to continue.");
+                router.push("/login"); // Redirect to login page
             } else {
                 // Handle registration error
                 toast.error(res.error || "Registration failed");
             }
-
-
-
-
-
         });
     };
 

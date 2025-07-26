@@ -1,121 +1,66 @@
-import { NextResponse } from "next/server";
-import { getUserFromRequest } from "@app/utils/getUserFromRequest";
-import { db } from "@app/services/firebase";
-import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
-import { getCareerRecommendations } from "@app/services/careerRecommendations";
+import { NextRequest, NextResponse } from 'next/server';
+import { getUserFromRequest } from '@app/utils/getUserFromRequest';
 
-const REQUIRED_TYPES = ["hexaco", "riasec", "mi", "family"];
+export async function POST(request: NextRequest) {
+    try {
+        const userUid = await getUserFromRequest(request);
+        if (!userUid) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-/**
- * @openapi
- * /api/recommendations:
- *   get:
- *     summary: Get career recommendations based on latest user assessments
- *     tags:
- *       - Recommendations
- *     responses:
- *       200:
- *         description: Career recommendations based on latest assessments
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 recommendations:
- *                   type: array
- *                   items:
- *                     type: object
- *       400:
- *         description: Missing required assessment(s)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *       401:
- *         description: Unauthorized (no valid auth token)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- */
-export async function GET(request: Request) {
-  try {
-    // 1. Get user UID
-    const uid = await getUserFromRequest(request);
-    if (!uid) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+        const { subscriptionId } = await request.json();
 
-    // 2. Fetch all assessments
-    const assessmentsSnap = await getDocs(collection(db, `users/${uid}/assessments`));
-    const assessments = assessmentsSnap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
-    console.log('Fetched assessments:', JSON.stringify(assessments, null, 2));
-
-    // 3. For each required type, select the most recent assessment
-    const latestByType: Record<string, any> = {};
-    for (const type of REQUIRED_TYPES) {
-      const filtered = assessments.filter(a => a.type === type);
-      if (filtered.length > 0) {
-        // Sort by createdAt, handling both Firestore timestamps and regular dates
-        filtered.sort((a, b) => {
-          const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-          const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-          return bTime.getTime() - aTime.getTime();
+        // Check if all required assessments are completed
+        const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
+            headers: {
+                'Cookie': request.headers.get('cookie') || ''
+            }
         });
-        latestByType[type] = filtered[0];
-      }
+
+        if (!profileResponse.ok) {
+            return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
+        }
+
+        const profileData = await profileResponse.json();
+        const assessments = profileData.assessments || {};
+
+        // Check if all required assessments are completed
+        const requiredTests = ['family', 'hexaco', 'riasec', 'mi'];
+        const completedTests = requiredTests.filter(test => assessments[test]);
+
+        if (completedTests.length < requiredTests.length) {
+            return NextResponse.json({ 
+                error: 'Please complete all required assessments before generating recommendations',
+                missingTests: requiredTests.filter(test => !assessments[test])
+            }, { status: 400 });
+        }
+
+        // Generate AI recommendations
+        const recommendationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/recommendations/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            },
+            body: JSON.stringify({
+                subscriptionId,
+                assessments: completedTests
+            })
+        });
+
+        if (!recommendationsResponse.ok) {
+            return NextResponse.json({ error: 'Failed to generate recommendations' }, { status: 500 });
+        }
+
+        const recommendationsData = await recommendationsResponse.json();
+
+        return NextResponse.json({
+            success: true,
+            recommendations: recommendationsData.recommendations
+        });
+
+    } catch (error) {
+        console.error('Error generating recommendations:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-
-    // 4. Check if any required assessment is missing
-    for (const type of REQUIRED_TYPES) {
-      if (!latestByType[type]) {
-        return NextResponse.json({ error: `Missing assessment: ${type}` }, { status: 400 });
-      }
-    }
-
-    // 5. Prepare input for recommendation service
-    const input = {
-      hexaco: latestByType.hexaco.traitScores,
-      riasec: latestByType.riasec.categoryScores,
-      mi: latestByType.mi.miScores,
-      familyContext: latestByType.family.summary,
-    };
-
-    // 6. Get recommendations
-    const recommendations = await getCareerRecommendations(input);
-
-    // 7. Save recommendations to Firestore
-    const tier = latestByType.hexaco?.assessmentType || "Free";
-    await addDoc(collection(db, `users/${uid}/recommendations`), {
-      recommendations,
-      tier,
-      createdAt: serverTimestamp(),
-      inputAssessments: {
-        hexaco: latestByType.hexaco?.id,
-        riasec: latestByType.riasec?.id,
-        mi: latestByType.mi?.id,
-        family: latestByType.family?.id,
-      },
-    });
-
-    return NextResponse.json({ recommendations });
-  } catch (error) {
-    console.error('Recommendations error:', error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
 }

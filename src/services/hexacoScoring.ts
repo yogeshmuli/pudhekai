@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { db } from "./firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { generateHexacoInterpretations, HexacoTraitScore } from "./hexacoInterpretation";
 
 export type HexacoQuestion = {
   id: string;
@@ -11,9 +12,15 @@ export type HexacoQuestion = {
   text: string;
 };
 
-export type UserResponses = { [id: string]: number };
+export type UserResponses = { [questionId: string]: number };
 
 export type AssessmentType = "free" | "paid";
+
+export interface HexacoResult {
+  traitScores: { [trait: string]: number };
+  questionsUsed: string[];
+  interpretation?: any; // Single interpretation object
+}
 
 // Load questions from JSON file (sync for simplicity)
 function loadQuestions(): HexacoQuestion[] {
@@ -79,13 +86,43 @@ async function fetchHexacoQuestions(): Promise<HexacoQuestion[]> {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as HexacoQuestion[];
 }
 
+// Convert trait scores to format needed for interpretation
+function convertToTraitScores(traitScores: { [trait: string]: number }): HexacoTraitScore[] {
+  const maxScore = 5; // HEXACO uses 1-5 scale
+  return Object.entries(traitScores).map(([trait, score]) => ({
+    trait,
+    score: Math.round(score * 10) / 10, // Round to 1 decimal
+    maxScore,
+    percentage: Math.round((score / maxScore) * 100)
+  }));
+}
+
 // Example usage in an API handler:
 export async function getHexacoResult(
   userResponses: UserResponses,
-  assessmentType: AssessmentType = "free"
-) {
+  assessmentType: AssessmentType = "free",
+  userContext?: {
+    age?: number;
+    gender?: string;
+    currentGrade?: string;
+  }
+): Promise<HexacoResult> {
   const allQuestions = await fetchHexacoQuestions();
   const selectedQuestions = selectQuestions(allQuestions, assessmentType);
   const traitScores = scoreHexaco(selectedQuestions, userResponses);
-  return { traitScores, questionsUsed: selectedQuestions.map((q) => q.id) };
+  
+  // Convert scores for interpretation
+  const traitScoresForInterpretation: HexacoTraitScore[] = Object.entries(traitScores).map(([trait, score]) => ({
+    trait,
+    score
+  }));
+  
+  // Generate single comprehensive interpretation
+  const interpretation = await generateHexacoInterpretations(traitScoresForInterpretation, userContext);
+  
+  return { 
+    traitScores, 
+    questionsUsed: selectedQuestions.map((q) => q.id), 
+    interpretation 
+  };
 }

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { db } from "./firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { generateMIInterpretations, MIScore } from "./miInterpretation";
 
 // For MI, NIH, LearningStyle, Reasoning
 export type GenericQuestion = {
@@ -12,7 +13,14 @@ export type GenericQuestion = {
   text: string;
 };
 
-export type UserResponses = { [id: string]: number };
+export type UserResponses = { [questionId: string]: number };
+export type AssessmentType = "free" | "paid";
+
+export interface MIResult {
+  miScores: { [type: string]: number };
+  questionsUsed: string[];
+  interpretation?: any; // Single interpretation object
+}
 
 function loadQuestions(filename: string): GenericQuestion[] {
   try {
@@ -54,10 +62,40 @@ async function fetchQuestionsFromFirestore(collectionName: string): Promise<Gene
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as GenericQuestion[];
 }
 
+// Convert MI scores to format needed for interpretation
+function convertToMIScores(miScores: { [intelligence: string]: number }): MIScore[] {
+  const maxScore = 5; // MI uses 1-5 scale
+  return Object.entries(miScores).map(([intelligence, score]) => ({
+    intelligence,
+    score: Math.round(score * 10) / 10, // Round to 1 decimal
+    maxScore,
+    percentage: Math.round((score / maxScore) * 100)
+  }));
+}
+
 // Usage for MI:
-export async function getMIResult(userResponses: UserResponses) {
+export async function getMIResult(
+  userResponses: UserResponses, 
+  assessmentType: AssessmentType = "free",
+  userContext?: { age?: number; gender?: string; currentGrade?: string; }
+): Promise<MIResult> {
   const questions = await fetchQuestionsFromFirestore("questions_mi");
-  return scoreByDomain(questions, userResponses, "intelligence");
+  const miScores = scoreByDomain(questions, userResponses, "intelligence");
+  
+  // Convert scores for interpretation
+  const miScoresForInterpretation: MIScore[] = Object.entries(miScores).map(([intelligence, score]) => ({
+    intelligence,
+    score
+  }));
+  
+  // Generate single comprehensive interpretation
+  const interpretation = await generateMIInterpretations(miScoresForInterpretation, userContext);
+  
+  return { 
+    miScores, 
+    questionsUsed: questions.map((q) => q.id), 
+    interpretation 
+  };
 }
 
 // Usage for NIH:

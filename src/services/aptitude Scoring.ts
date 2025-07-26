@@ -1,3 +1,5 @@
+import { generateAptitudeInterpretations, AptitudeCategoryScore } from "./aptitudeInterpretation";
+
 // Types
 type AptitudeQuestion = {
     id: string;
@@ -6,6 +8,15 @@ type AptitudeQuestion = {
   };
   
   type AptitudeResponse = { [id: string]: number }; // e.g., { "pr1": 2, "lr1": 1, ... }
+
+  export interface AptitudeResult {
+    categories: { [type: string]: { correct: number; total: number; percent: number; label: string } };
+    totalScore: number;
+    totalQuestions: number;
+    totalPercent: number;
+    summary: string;
+    interpretation?: any; // Single interpretation object
+  }
   
   // Label generator for percentiles
   function getLabel(pct: number): string {
@@ -13,12 +24,28 @@ type AptitudeQuestion = {
     if (pct >= 60) return "Moderate";
     return "Needs Improvement";
   }
+
+  // Convert aptitude scores to format needed for interpretation
+  function convertToAptitudeScores(result: any): AptitudeCategoryScore[] {
+    return Object.entries(result.categories).map(([category, data]: [string, any]) => ({
+      category: category.replace(/_/g, " "),
+      correct: data.correct,
+      total: data.total,
+      percent: data.percent,
+      label: data.label
+    }));
+  }
   
   // Main scoring function
-  export function scoreAptitudeTest(
+  export async function scoreAptitudeTest(
     questionBank: AptitudeQuestion[],
-    responses: AptitudeResponse
-  ) {
+    responses: AptitudeResponse,
+    userContext?: {
+      age?: number;
+      gender?: string;
+      currentGrade?: string;
+    }
+  ): Promise<AptitudeResult> {
     // Organize scores by type
     const categoryScores: { [type: string]: { correct: number; total: number } } = {};
   
@@ -58,6 +85,12 @@ type AptitudeQuestion = {
         `${cat.replace(/_/g, " ")}: ${val.correct}/${val.total} (${val.label})`
       )
       .join(", ");
+  
+    // Generate interpretations using AI
+    const aptitudeScoresForInterpretation = convertToAptitudeScores(result);
+    const interpretation = await generateAptitudeInterpretations(aptitudeScoresForInterpretation, userContext);
+    
+    result.interpretation = interpretation;
   
     return result;
   }

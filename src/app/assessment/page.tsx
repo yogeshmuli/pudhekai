@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "@app/hooks";
 import { toast, Toaster } from "react-hot-toast"; // Add this import
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardHeader from "@app/components/header/dashboardheader";
-
+import { setTestName } from "@app/slice/assesement.slice";
 
 
 function QuizProgress({ current, total }: { current: number; total: number }) {
@@ -115,7 +115,8 @@ export default function Assessment() {
 
     useEffect(() => {
         if (!testName) {
-            router.push("/home");
+            // If no test is selected, start with family background
+            dispatch(setTestName("family"));
         }
         checkSubscription();
     }, []);
@@ -144,24 +145,50 @@ export default function Assessment() {
 
     const fetchQuestions = async () => {
         try {
+            console.log('Fetching questions for test:', testName, 'assessmentType:', assesmentType);
+            
             const response = await dispatch(fetchQuizQuestions({
                 test: testName,
                 assessmentType: assesmentType
             })).unwrap();
 
-            const mappedQuestions: Question[] = response.questions.map((q: any) => ({
-                id: q.id,
-                question: q.text,
-                description: `Facet: ${q.facet}, Trait: ${q.trait}`,
-                options: [
-                    { label: "Strongly Disagree", description: "I do not relate to this at all.", value: 1 },
-                    { label: "Disagree", description: "I somewhat relate to this.", value: 2 },
-                    { label: "Neutral", description: "I neither agree nor disagree.", value: 3 },
-                    { label: "Agree", description: "I mostly relate to this.", value: 4 },
-                    { label: "Strongly Agree", description: "I completely relate to this.", value: 5 },
-                ],
-            }));
-            setQuestions(mappedQuestions); // Limit to 10 questions for free assessment
+            console.log('Raw questions response:', response);
+
+            const mappedQuestions: Question[] = response.questions.map((q: any) => {
+                // Handle different question types
+                if (testName === "family") {
+                    // Family questions have different structure
+                    console.log('Mapping family question:', q);
+                    return {
+                        id: q.id,
+                        question: q.text,
+                        description: `Domain: ${q.domain}`,
+                        options: q.options.map((option: string, index: number) => ({
+                            label: option,
+                            description: option,
+                            value: index + 1
+                        }))
+                    };
+                } else {
+                    // HEXACO and other personality tests
+                    console.log('Mapping personality question:', q);
+                    return {
+                        id: q.id,
+                        question: q.text,
+                        description: `Facet: ${q.facet || 'N/A'}, Trait: ${q.trait || 'N/A'}`,
+                        options: [
+                            { label: "Strongly Disagree", description: "I do not relate to this at all.", value: 1 },
+                            { label: "Disagree", description: "I somewhat relate to this.", value: 2 },
+                            { label: "Neutral", description: "I neither agree nor disagree.", value: 3 },
+                            { label: "Agree", description: "I mostly relate to this.", value: 4 },
+                            { label: "Strongly Agree", description: "I completely relate to this.", value: 5 },
+                        ],
+                    };
+                }
+            });
+            
+            console.log('Mapped questions:', mappedQuestions);
+            setQuestions(mappedQuestions);
 
             // Initialize answers as { [id]: null }
             const initialAnswers: { [id: string]: number | null } = {};
@@ -172,6 +199,7 @@ export default function Assessment() {
 
         } catch (error) {
             console.error("Error fetching questions:", error);
+            toast.error("Failed to load questions. Please try again.");
         }
     };
 
@@ -206,11 +234,21 @@ export default function Assessment() {
                 toast.error("Please answer all questions before submitting.");
                 return;
             }
+
+            // Get current subscription
+            const subscriptionResponse = await fetch('/api/subscription/current');
+            let subscriptionId = null;
+            if (subscriptionResponse.ok) {
+                const subData = await subscriptionResponse.json();
+                subscriptionId = subData.subscription?.id;
+            }
+
             const result = await dispatch(
                 submitAssessmentResponse({
                     responses: answers,
                     assessmentType: assesmentType,
                     testName: testName, // e.g., "hexaco"
+                    subscriptionId: subscriptionId,
                 })
             ).unwrap();
 
@@ -218,7 +256,7 @@ export default function Assessment() {
             router.push("/home")
             // handle result (e.g., show recommendations)
         } catch (error: any) {
-            debugger
+            console.error("Assessment submission error:", error);
             toast.error(error?.message || "Failed to submit assessment");
         }
     }

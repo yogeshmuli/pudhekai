@@ -86,7 +86,7 @@ export default function DashboardHeader() {
                                 <button
                                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
                                     onClick={() => {
-                                        router.push('/dashboard');
+                                        router.push('/home');
                                         setDropdownOpen(false);
                                     }}
                                 >
@@ -95,11 +95,11 @@ export default function DashboardHeader() {
                                 <button
                                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"
                                     onClick={() => {
-                                        router.push('/tier-selection');
+                                        router.push('/dashboard');
                                         setDropdownOpen(false);
                                     }}
                                 >
-                                    Subscription
+                                    Profile & Settings
                                 </button>
                                 <button
                                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary/10 transition-colors"

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Header from "@app/components/header/landingheader";
 import TestimonialSection from "@app/app/landing/testimonial/index";
 import HowItWorksSection from "./howitworks";
@@ -9,6 +10,12 @@ import Footer from "@app/components/Footer";
 
 
 export default function Landing() {
+    const router = useRouter();
+
+    const handleStartAssessment = () => {
+        router.push("/register");
+    };
+
     return (
         <div className="flex flex-col items-center justify-start min-h-screen">
             <Header />
@@ -26,7 +33,10 @@ export default function Landing() {
                             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                                 Discover your best-fit careers based on your personality, interests, and intelligence.
                             </p>
-                            <button className="bg-primary hover:bg-secondary text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl">
+                            <button 
+                                onClick={handleStartAssessment}
+                                className="bg-primary hover:bg-secondary text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+                            >
                                 Start Your FREE Career Discovery Now!
                             </button>
                         </div>

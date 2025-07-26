@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { getMIResult, UserResponses } from "../../../services/miScoring";
+import { getMIResult, UserResponses, AssessmentType } from "../../../services/miScoring";
 import { getUserFromRequest } from "@app/utils/getUserFromRequest";
 import { validateSubscription } from "@app/utils/subscriptionValidation";
 import { db } from "@app/services/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 
 /**
  * @openapi
  * /api/mi:
  *   post:
- *     summary: Calculate Multiple Intelligences (MI) scores
+ *     summary: Calculate Multiple Intelligences (MI) scores with AI interpretations
  *     tags:
  *       - Assessment & Results
  *     requestBody:
@@ -25,7 +25,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
  *                   type: integer
  *     responses:
  *       200:
- *         description: MI scores by intelligence type
+ *         description: MI scores, interpretations, and intelligence types
  */
 export async function POST(request: Request) {
   try {
@@ -46,20 +46,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error }, { status: 403 });
     }
 
-    const miScores = await getMIResult(responses as UserResponses);
+    // Fetch user context for better interpretations
+    let userContext = undefined;
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        userContext = {
+          age: userData.age || undefined,
+          gender: userData.gender || undefined,
+          currentGrade: userData.currentGrade || undefined,
+        };
+      }
+    } catch (error) {
+      console.warn("Could not fetch user context for interpretations:", error);
+    }
 
-    // Save to Firestore under users/{uid}/assessments
+    const { miScores, questionsUsed, interpretation } = await getMIResult(
+      responses as UserResponses,
+      assessmentType as AssessmentType || "free",
+      userContext
+    );
+    
     const assessmentData = {
       type: "mi",
       miScores,
+      questionsUsed,
+      interpretation, // Store single AI-generated interpretation
       assessmentType: assessmentType || "free",
       subscriptionId: subscriptionId || null,
       createdAt: serverTimestamp(),
     };
     await addDoc(collection(db, `users/${uid}/assessments`), assessmentData);
-
-    return NextResponse.json({ miScores });
+    
+    return NextResponse.json({ miScores, questionsUsed, interpretation });
   } catch (error) {
+    console.error("MI assessment error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 } 

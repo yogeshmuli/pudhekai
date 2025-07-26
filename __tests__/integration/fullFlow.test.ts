@@ -311,7 +311,7 @@ describe('Full User Flow Integration Test', () => {
 
   it('should generate career report', async () => {
     const res = await request(BASE_URL)
-      .get('/api/report')
+      .get(`/api/report?subscription=${subscriptionId}`)
       .set('Cookie', `auth_token=${authToken}`);
     console.log('Report status:', res.status);
     console.log('Report response:', res.body);
@@ -323,8 +323,9 @@ describe('Full User Flow Integration Test', () => {
 
   it('should download PDF report', async () => {
     const res = await request(BASE_URL)
-      .get('/api/report/download')
-      .set('Cookie', `auth_token=${authToken}`);
+      .post('/api/report/download')
+      .set('Cookie', `auth_token=${authToken}`)
+      .send({ subscriptionId });
     console.log('PDF download status:', res.status);
     console.log('PDF content type:', res.headers['content-type']);
     console.log('PDF content length:', res.headers['content-length']);
